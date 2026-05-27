@@ -36,6 +36,9 @@ let
     plugin:
     let
       id = plugin.id or (throw "OpenClaw npm runtime plugin ${plugin.source} requires id");
+      # TODO: This is only a partial bridge for OpenClaw runtime plugins.
+      # Proper support needs a structural fix that proves the gateway loads the
+      # built plugin root and exposes its channel/register hook end to end.
       path = mkNpmRuntimePlugin {
         inherit id;
         source = plugin.source;

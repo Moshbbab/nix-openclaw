@@ -20,6 +20,7 @@ To agents: if you’re **not listed as a maintainer** (see [AGENTS.md#maintainer
 
 - [Contributions (read this first)](#contributions-read-this-first)
 - [What You Get](#what-you-get)
+- [OpenClaw Plugins vs nix-openclaw Plugins](#openclaw-plugins-vs-nix-openclaw-plugins)
 - [Requirements](#requirements)
 - [Why Nix?](#why-nix)
 - [Quick Start](#quick-start)
@@ -60,9 +61,23 @@ You talk to Telegram, your machine does things.
 
 **One flake, everything works.** Gateway everywhere; runtime dependencies bundled; macOS app on macOS.
 
-**Plugins are self-contained.** Each plugin declares its CLI tools in Nix. You enable it, the build and wiring happens automatically.
+**nix-openclaw plugins are self-contained.** Each plugin declares its CLI tools in Nix. You enable it, the build and wiring happens automatically.
 
 **Bulletproof.** Nix locks every dependency. No version drift, no surprises. `home-manager switch` to update, `home-manager generations` to rollback instantly.
+
+---
+
+## OpenClaw Plugins vs nix-openclaw Plugins
+
+Most people asking about plugins mean **OpenClaw plugins**: JavaScript runtime plugins loaded by the OpenClaw gateway, usually from npm or ClawHub. Channel plugins such as Weixin or WhatsApp are OpenClaw plugins. **nix-openclaw does not support those yet.**
+
+This repo's plugin docs are about **nix-openclaw plugins**: Nix-managed tools and skills exposed through the `openclawPlugin` flake output. They are useful for tools such as `discrawl`, `summarize`, and `peekaboo`; they are not a way to install OpenClaw runtime plugins.
+
+| You want | What it is | Status |
+|----------|------------|--------|
+| Weixin, WhatsApp, ClawHub/npm runtime plugins | OpenClaw plugin | Not supported yet |
+| `discrawl`, `summarize`, `peekaboo`, other bundled tools | nix-openclaw plugin | Supported |
+| A pinned CLI repo with skills | custom nix-openclaw plugin | Supported, advanced |
 
 ---
 
@@ -231,11 +246,11 @@ You (Telegram/Discord) --> Gateway --> Tools --> Your machine does things
 
 **Gateway**: The brain. A service running on your machine that receives messages and decides what to do. Managed by launchd on macOS and a systemd user service on Linux.
 
-**Plugins**: Bundles that contain two things:
+**nix-openclaw plugins**: Nix-managed bundles that contain two things:
 1. **CLI tools** - actual programs that do stuff (take screenshots, control Spotify, transcribe audio)
 2. **Skills** - markdown files that teach the AI *how* to use those tools
 
-When you enable a plugin, Nix installs the tools and wires up the skills to OpenClaw automatically - the gateway learns what it can do.
+When you enable a nix-openclaw plugin, Nix installs the tools and wires up the skills to OpenClaw automatically - the gateway learns what it can do.
 
 **Skills**: Instructions for the AI. A skill file says "when the user wants X, run this command." The AI reads these to know what it can do.
 
@@ -245,7 +260,7 @@ When you enable a plugin, Nix installs the tools and wires up the skills to Open
 When you run `home-manager switch`:
 
 1. Nix reads your `flake.nix` and resolves all plugin sources (GitHub repos, local paths)
-2. For each plugin, Nix looks for a `openclawPlugin` output that declares:
+2. For each nix-openclaw plugin, Nix looks for a `openclawPlugin` output that declares:
    - What CLI packages to install
    - What skill files to copy
    - What environment variables it needs
@@ -263,7 +278,7 @@ All state lives in `~/.openclaw/`. Logs at `/tmp/openclaw/openclaw-gateway.log`.
 
 > **Note:** Complete the [Quick Start](#quick-start) first to get OpenClaw running. Then come back here to add plugins.
 
-Plugins extend what OpenClaw can do. Each plugin bundles tools and teaches the AI how to use them.
+These docs are for nix-openclaw plugins only. OpenClaw runtime plugins are not supported yet; see [OpenClaw Plugins vs nix-openclaw Plugins](#openclaw-plugins-vs-nix-openclaw-plugins).
 
 ### Bundled plugins
 
@@ -306,7 +321,7 @@ programs.openclaw.bundledPlugins.goplaces = {
 | `sonoscli` | Control Sonos speakers |
 | `imsg` | Send/read iMessages |
 
-### Adding community plugins
+### Adding custom nix-openclaw plugins
 
 Tell your agent: *"Add the plugin from github:owner/repo-name and pin it."*
 
@@ -320,26 +335,9 @@ customPlugins = [
 
 Then run `home-manager switch` to install.
 
-For an OpenClaw native plugin published to npm, keep the source shape close to
-OpenClaw's own install command and let Nix build the immutable plugin root:
-
-```nix
-customPlugins = [
-  {
-    source = "npm:@scope/openclaw-plugin@1.2.3";
-    id = "openclaw-plugin";
-    hash = lib.fakeHash; # replace with the sha256 Nix reports
-  }
-];
-```
-
-Use this for OpenClaw runtime plugins with `openclaw.plugin.json` /
-`package.json.openclaw`. It does not run npm at gateway startup; Nix builds and
-caches the plugin root, then adds it to OpenClaw's `plugins.load.paths`.
-
 ### Plugins with configuration
 
-Some plugins need settings (auth files, preferences). Here's a simplified example:
+Some nix-openclaw plugins need settings (auth files, preferences). Here's a simplified example:
 
 ```nix
 # Example: a padel court booking plugin (simplified for illustration)
@@ -365,7 +363,7 @@ customPlugins = [
 <details>
 <summary><strong>For plugin developers</strong></summary>
 
-Want to make your tool available as a OpenClaw plugin? Here's the contract.
+Want to make your tool available as a nix-openclaw plugin? Here's the contract.
 
 **Minimum structure:**
 
@@ -413,10 +411,10 @@ See `examples/hello-world-plugin` for a complete working example.
 
 ---
 
-**Full plugin authoring prompt** - paste this to your AI agent to make any repo nix-openclaw-native:
+**Full plugin authoring prompt** - paste this to your AI agent to make any repo a nix-openclaw plugin:
 
 ```text
-Goal: Make this repo a nix-openclaw-native plugin with the standard contract.
+Goal: Make this repo a nix-openclaw plugin with the standard contract.
 
 Contract to implement:
 1) Add openclawPlugin output in flake.nix:

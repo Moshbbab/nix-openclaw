@@ -1,39 +1,33 @@
-# OpenClaw Plugin Architecture (Maintainer Memo)
+# nix-openclaw Plugin Architecture (Maintainer Memo)
 
-Purpose: extend OpenClaw capabilities without bloating core; ship tools + skills + config as reproducible units you can pin, test, and roll back. nix-openclaw shows the contract; OpenClaw core should treat the same interface as first-class, even off-Nix.
+Purpose: define nix-openclaw plugins without confusing them with OpenClaw runtime plugins. A nix-openclaw plugin is a Nix-managed bundle of tools, skills, and config requirements.
 
 ## What a Plugin Is (and is not)
 - **Is:** bundle of binaries/CLIs, skills that teach the agent to use them, optional config/env requirements.
 - **Not:** new transports/providers; model plumbing; secrets baked in; inline scripts or ad-hoc package-manager installs; a place for random config outside its scope.
-- Why not skills-only: skills without binaries can hallucinate capability. Plugins ground skills in real tools and deliver versioned, reproducible functionality.
+- Why not skills-only: skills without binaries can imply tools that are not installed. Plugins ground skills in real tools and deliver versioned, reproducible functionality.
 
 ## Two Plugin Classes
 
-Nix capability plugins are the tool/skill/env bundles described below. They do not use OpenClaw's JavaScript plugin loader. They are the right shape for CLIs such as `goplaces`, `gog`, `qmd`, `xuezh`, `camsnap`, and `summarize`.
+nix-openclaw plugins are the tool/skill/env bundles described below. They do not use OpenClaw's JavaScript plugin loader. They are the right shape for CLIs such as `goplaces`, `gog`, `qmd`, `xuezh`, `camsnap`, and `summarize`.
 
-OpenClaw plugins are runtime plugin directories with `openclaw.plugin.json` plus built JavaScript loaded by the gateway. They include bundled upstream plugins, official external plugins from OpenClaw's catalog or ClawHub, and third-party plugins. In Nix-managed deployments, these should be immutable plugin roots, not runtime npm installs hidden in host config.
+OpenClaw plugins are runtime plugin directories with `openclaw.plugin.json` plus built JavaScript loaded by the gateway. They include bundled upstream plugins, official external plugins from OpenClaw's catalog or ClawHub, third-party npm plugins, and channel plugins such as Weixin or WhatsApp. nix-openclaw does not support these yet.
 
-Current nix-openclaw `customPlugins` implements both sides of the contract: package binaries on the gateway PATH, materialize skills, create state dirs, validate env files, render optional tool settings, and wire declared OpenClaw plugin roots into `plugins.load.paths` with an explicit default `plugins.entries.<id>.enabled` value.
+Current nix-openclaw `customPlugins` supports nix-openclaw plugins: package binaries on the gateway PATH, materialize skills, create state dirs, validate env files, and render optional tool settings.
 
 PR #81 (`fix: copy plugin manifests into dist/extensions`) was related but not the missing external-plugin feature. It fixed bundled upstream plugin manifests missing from the packaged gateway `dist/extensions/*/openclaw.plugin.json` tree. Current packaging already copies those manifests and checks them in `openclaw-package-contents`.
 
-Package authors can bridge the existing Nix contract to OpenClaw plugins:
+There is partial implementation code for wiring OpenClaw plugin roots into `plugins.load.paths`, but it is not a supported user-facing OpenClaw plugin install path yet. That needs a separate structural fix and runtime proof that the gateway actually loads the plugin and exposes the channel/register hook.
 
-- Extend `openclawPlugin` with an optional plugin declaration, for example `plugins = [ { id = "openclaw-weixin"; path = "${pkg}/lib/openclaw/plugins/openclaw-weixin"; enabled = true; } ];`.
-- For each selected plugin artifact, append those paths to generated `plugins.load.paths`.
-- Add a default `plugins.entries.<id>.enabled` value. `enabled` defaults to true, but plugin authors can set `enabled = false` for roots that should be discoverable while disabled until the host supplies config. User config can still override either default.
-- Keep OpenClaw plugin config in `programs.openclaw.config` / `instances.<name>.config` so upstream schema validation remains the source of truth.
-- Add a fixture shaped like `openclaw-weixin` so `customPlugins = [{ source = ...; }]` proves both package/skill wiring and OpenClaw plugin load wiring.
-
-## Interface Contract (reference implementation: nix-openclaw)
-Every plugin artifact exposes the same fields (flake output `openclawPlugin` today, but the shape is host-agnostic):
+## Interface Contract
+Every nix-openclaw plugin exposes the same fields through the `openclawPlugin` flake output:
 
 ```nix
 openclawPlugin = {
   name        = "summarize";                # unique; last-wins on collision
   skills      = [ ./skills/summarize ];      # dirs containing SKILL.md
   packages    = [ pkgs.summarize-cli ];      # binaries placed on the OpenClaw runtime PATH
-  plugins     = [ ];                         # optional OpenClaw plugin roots: { id, path, enabled ? true }
+  plugins     = [ ];                         # implementation detail; not supported as an OpenClaw plugin install path yet
   needs = {
     stateDirs   = [ ".config/summarize" ]; # created under $HOME
     requiredEnv = [ "SUMMARIZE_API_KEY" ];  # must point to files
@@ -49,7 +43,7 @@ Host responsibilities (what the runtime guarantees):
 - Copy/symlink each `skills` entry into `workspace/skills/<skill-dir-basename>/...`.
 - If host config provides `config.settings`, render it to `config.json` in the first `stateDir`.
 - Export `config.env` (plus required envs) into the gateway wrapper.
-- Add declared OpenClaw plugin roots to `plugins.load.paths`, and set `plugins.entries.<id>.enabled` from the plugin contract as a default.
+- Add declared OpenClaw plugin roots to `plugins.load.paths`, and set `plugins.entries.<id>.enabled` from the plugin contract as a default. This is implementation plumbing, not supported OpenClaw plugin installation.
 - Reject duplicate skill paths; duplicate plugin names: last entry wins.
 
 ### Host-side config shape
@@ -71,27 +65,7 @@ programs.openclaw.customPlugins = [
 - `config.settings`: JSON-rendered into `config.json` inside the first `stateDir`.
 - Invariant: providing `settings` requires at least one `stateDir`.
 
-Do not add raw npm package names to host config for the batteries-included path. Curated plugins packaged by this repo or `nix-openclaw-tools` should be exposed through package/check outputs so Garnix caches them.
-
-OpenClaw native npm plugins use the same host list with an OpenClaw-style source:
-
-```nix
-programs.openclaw.customPlugins = [
-  {
-    source = "npm:@scope/openclaw-plugin@1.2.3";
-    id = "openclaw-plugin";
-    hash = lib.fakeHash; # replace with the sha256 Nix reports
-  }
-];
-```
-
-- `source`: currently supports registry npm specs with an explicit `npm:` prefix.
-- `id`: required because the Home Manager module must enable the plugin at eval time without importing the built JavaScript package.
-- `hash`: recursive output hash for the immutable plugin root; leave as `lib.fakeHash` to have Nix report the expected hash, then commit that value.
-- Runtime plugin config belongs in `programs.openclaw.config.plugins.entries.<id>.config`, not in `customPlugins.config`.
-- The module adds the built root to `plugins.load.paths` and writes a default `plugins.entries.<id>.enabled` value. OpenClaw owns runtime loading after that.
-
-Curated npm plugins can be added to this repo or `nix-openclaw-tools` so Garnix caches them. Arbitrary user npm specs are still deterministic Nix artifacts, but this repo's cache cannot cover every user's private plugin choice. The user's local store or configured binary cache reuses the artifact until the source or hash changes. OpenClaw must not reinstall it on every gateway start.
+Do not add raw npm package names to host config or documentation yet. The implementation has a partial npm bridge for OpenClaw runtime plugins, but that is not a supported nix-openclaw plugin path until the separate structural OpenClaw plugin work is done.
 
 ## Dev workflow (fast iteration)
 - Worktree: build and test plugins outside the core repo; point OpenClaw at a local path source during impure local dev (e.g., `source = "path:/Users/you/code/my-plugin"`). Committed config uses pinned refs.
@@ -103,7 +77,7 @@ Curated npm plugins can be added to this repo or `nix-openclaw-tools` so Garnix 
 
 ## Examples
 
-### Minimal capability plugin (bundled `summarize`)
+### Minimal nix-openclaw plugin (bundled `summarize`)
 Enable (host side):
 
 ```nix
