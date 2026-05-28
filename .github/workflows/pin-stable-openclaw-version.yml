@@ -69,6 +69,7 @@ jobs:
     timeout-minutes: 60
     outputs:
       materialization_digest: ${{ steps.materialization.outputs.materialization_digest }}
+      validation_ok: ${{ steps.validation.outputs.validation_ok }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -77,6 +78,8 @@ jobs:
         uses: cachix/install-nix-action@v31
 
       - name: Materialize selected release
+        id: materialize
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -88,6 +91,7 @@ jobs:
 
       - name: Record materialized diff digest
         id: materialization
+        if: steps.materialize.outcome == 'success'
         run: |
           set -euo pipefail
           digest="$(
@@ -101,16 +105,43 @@ jobs:
           echo "materialization_digest=${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Verify flake.lock owners
+        id: owners
+        if: steps.materialize.outcome == 'success'
+        continue-on-error: true
         run: scripts/check-flake-lock-owners.sh
 
       - name: Run Linux CI aggregator
+        id: ci
+        if: steps.materialize.outcome == 'success' && steps.owners.outcome == 'success'
+        continue-on-error: true
         run: timeout --foreground 50m nix build .#checks.x86_64-linux.ci --accept-flake-config
 
       - name: Dump failing source check log
-        if: failure()
+        if: steps.ci.outcome == 'failure'
         run: |
           drv="$(nix eval --raw .#checks.x86_64-linux.source-checks.drvPath --accept-flake-config)"
           nix log "$drv" | tail -n 400 || true
+
+      - name: Record validation result
+        id: validation
+        if: always()
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.materialize.outcome }}" == "success" && "${{ steps.owners.outcome }}" == "success" && "${{ steps.ci.outcome }}" == "success" ]]; then
+            echo "validation_ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "validation_ok=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Linux validation did not pass"
+            echo
+            echo "- Materialize: \`${{ steps.materialize.outcome }}\`"
+            echo "- flake.lock owners: \`${{ steps.owners.outcome }}\`"
+            echo "- CI aggregator: \`${{ steps.ci.outcome }}\`"
+            echo
+            echo "Promotion skipped; pinned source remains unchanged."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   validate-macos:
     needs: select
@@ -119,6 +150,7 @@ jobs:
     timeout-minutes: 40
     outputs:
       materialization_digest: ${{ steps.materialization.outputs.materialization_digest }}
+      validation_ok: ${{ steps.validation.outputs.validation_ok }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -127,6 +159,8 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Materialize selected release
+        id: materialize
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -138,6 +172,7 @@ jobs:
 
       - name: Record materialized diff digest
         id: materialization
+        if: steps.materialize.outcome == 'success'
         run: |
           set -euo pipefail
           digest="$(
@@ -151,19 +186,51 @@ jobs:
           echo "materialization_digest=${digest}" >> "$GITHUB_OUTPUT"
 
       - name: Build Darwin CI aggregator
+        id: ci
+        if: steps.materialize.outcome == 'success'
+        continue-on-error: true
         timeout-minutes: 25
         run: nix build .#checks.aarch64-darwin.ci --accept-flake-config
 
       - name: Run HM activation
+        id: hm
+        if: steps.materialize.outcome == 'success' && steps.ci.outcome == 'success'
+        continue-on-error: true
         timeout-minutes: 10
         run: scripts/hm-activation-macos.sh
+
+      - name: Record validation result
+        id: validation
+        if: always()
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.materialize.outcome }}" == "success" && "${{ steps.ci.outcome }}" == "success" && "${{ steps.hm.outcome }}" == "success" ]]; then
+            echo "validation_ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "validation_ok=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "### macOS validation did not pass"
+            echo
+            echo "- Materialize: \`${{ steps.materialize.outcome }}\`"
+            echo "- CI aggregator: \`${{ steps.ci.outcome }}\`"
+            echo "- HM activation: \`${{ steps.hm.outcome }}\`"
+            echo
+            echo "Promotion skipped; pinned source remains unchanged."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   promote:
     needs:
       - select
       - validate-linux
       - validate-macos
-    if: needs.select.outputs.has_update == 'true'
+    if: >-
+      ${{
+        needs.select.outputs.has_update == 'true' &&
+        needs.validate-linux.outputs.validation_ok == 'true' &&
+        needs.validate-macos.outputs.validation_ok == 'true'
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
