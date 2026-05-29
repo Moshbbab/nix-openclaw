@@ -529,7 +529,7 @@ Command:
 ```bash
 OPENCLAW_NIX_MODE=1 \
 OPENCLAW_CONFIG_PATH="$fixture/openclaw.json" \
-openclaw plugins list --json --verbose
+openclaw plugins list --json
 ```
 
 Assertions:
@@ -593,7 +593,7 @@ Runtime-specific gates:
 - Home Manager evaluation rejects deferred ids such as `codex`,
   `memory-lancedb`, `openclaw-weixin`, and arbitrary unknown ids with direct
   messages;
-- `openclaw plugins list --json --verbose` passes the cold discovery proof on
+- `openclaw plugins list --json` passes the cold discovery proof on
   Darwin and Linux;
 - `openclaw plugins inspect <id> --runtime --json` passes the runtime import
   proof for every supported id on Darwin and Linux.
@@ -630,8 +630,10 @@ grant under upstream OpenClaw config.
 
 ## Future RFCs
 
-1. **Dependency materialization RFC** for `acpx`, `codex`, `memory-lancedb`,
-   and any future official package whose tarball is not self-contained.
+1. **Dependency materialization RFC** for `codex`, `memory-lancedb`, and any
+   future official package whose tarball is not self-contained. ACPX is a
+   separate bundled-runtime packaging audit because nix-openclaw already
+   consumes it from OpenClaw's built `dist-runtime/extensions/acpx` tree.
 2. **ClawHub artifact RFC** for packages where the correct Nix source should be
    a ClawHub artifact, including verdict metadata and artifact hashes.
 3. **Catalog-pinned third-party RFC** for WeCom, Yuanbao, Weixin, and similar

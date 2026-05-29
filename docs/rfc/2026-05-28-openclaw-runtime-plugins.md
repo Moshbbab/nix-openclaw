@@ -555,7 +555,7 @@ Published package checks:
 - `@openclaw/slack@2026.5.26` has `runtimeExtensions`, `runtimeSetupEntry`, `openclaw.compat.pluginApi >=2026.5.26`, `peerDependencies.openclaw >=2026.5.26`, bundled runtime dependencies, and `npm-shrinkwrap.json`.
 - `@openclaw/discord@2026.5.26` has `runtimeExtensions`, `runtimeSetupEntry`, `openclaw.compat.pluginApi >=2026.5.26`, `peerDependencies.openclaw >=2026.5.26`, bundled runtime dependencies, and `npm-shrinkwrap.json`.
 - `@openclaw/brave-plugin@2026.5.26` and `@openclaw/diagnostics-prometheus@2026.5.26` have no runtime dependencies; they are V1a candidates even though they have no bundled dependency tree.
-- `@openclaw/codex@2026.5.26`, `@openclaw/acpx@2026.5.26`, and `@openclaw/memory-lancedb@2026.5.26` have runtime dependencies but no bundled dependency tree; they are V1b.
+- `@openclaw/codex@2026.5.26` and `@openclaw/memory-lancedb@2026.5.26` have runtime dependencies but no bundled dependency tree; they need the later dependency-materialization RFC. `@openclaw/acpx@2026.5.26` has the same external npm shape, but nix-openclaw already consumes ACPX from OpenClaw's built `dist-runtime/extensions/acpx` tree, so its follow-up is a bundled-runtime packaging audit rather than another materialized npm root.
 
 nix-openclaw source:
 
