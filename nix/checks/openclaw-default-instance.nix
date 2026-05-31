@@ -483,7 +483,7 @@ let
   runtimePluginCatalogGeneratedEval = moduleEval {
     runtimePlugins = [
       "amazon-bedrock"
-      "feishu"
+      "discord"
     ];
   };
   runtimePluginCatalogGeneratedConfig = builtins.fromJSON (
@@ -505,13 +505,13 @@ let
           throw "runtimePlugins did not accept generated provider plugin ids."
         else if
           !(lib.any (
-            path: lib.hasInfix "openclaw-runtime-plugin-feishu" path
+            path: lib.hasInfix "openclaw-runtime-plugin-discord" path
           ) runtimePluginCatalogGeneratedLoadPaths)
         then
           throw "runtimePlugins did not accept generated channel plugin ids."
         else if ((runtimePluginCatalogGeneratedEntries.amazon-bedrock or { }).enabled or false) != true then
           throw "runtimePlugins did not enable generated provider plugin entry."
-        else if ((runtimePluginCatalogGeneratedEntries.feishu or { }).enabled or false) != true then
+        else if ((runtimePluginCatalogGeneratedEntries.discord or { }).enabled or false) != true then
           throw "runtimePlugins did not enable generated channel plugin entry."
         else
           "ok"

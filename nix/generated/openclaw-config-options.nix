@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 27ae826f65256c7fbd1d78475fca87b674a53e7b. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev e93216080aa1f425d3ab127014603eba8e365b2d. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -129,15 +129,6 @@ in
     type = t.nullOr (t.submodule { options = {
     defaults = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
-      agentRuntime = lib.mkOption {
-        type = t.nullOr (t.submodule { options = {
-        id = lib.mkOption {
-          type = t.nullOr (t.str);
-          default = null;
-        };
-      }; });
-        default = null;
-      };
       blockStreamingBreak = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "text_end" ]) (t.enum [ "message_end" ]) ]);
         default = null;
@@ -602,16 +593,7 @@ in
         type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "on" ]) (t.enum [ "ask" ]) (t.enum [ "full" ]) ]);
         default = null;
       };
-      embeddedHarness = lib.mkOption {
-        type = t.nullOr (t.submodule { options = {
-        runtime = lib.mkOption {
-          type = t.nullOr (t.str);
-          default = null;
-        };
-      }; });
-        default = null;
-      };
-      embeddedPi = lib.mkOption {
+      embeddedAgent = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         executionContract = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "default" ]) (t.enum [ "strict-agentic" ]) ]);
@@ -1668,10 +1650,6 @@ in
       }; });
         default = null;
       };
-      systemPromptOverride = lib.mkOption {
-        type = t.nullOr (t.str);
-        default = null;
-      };
       thinkingDefault = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "minimal" ]) (t.enum [ "low" ]) (t.enum [ "medium" ]) (t.enum [ "high" ]) (t.enum [ "xhigh" ]) (t.enum [ "adaptive" ]) (t.enum [ "max" ]) ]);
         default = null;
@@ -1721,6 +1699,23 @@ in
       }; }) ]);
         default = null;
       };
+      voiceModel = lib.mkOption {
+        type = t.nullOr (t.oneOf [ (t.str) (t.submodule { options = {
+        fallbacks = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        primary = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        timeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+      }; }) ]);
+        default = null;
+      };
       workspace = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
@@ -1732,15 +1727,6 @@ in
       type = t.nullOr (t.listOf (t.submodule { options = {
       agentDir = lib.mkOption {
         type = t.nullOr (t.str);
-        default = null;
-      };
-      agentRuntime = lib.mkOption {
-        type = t.nullOr (t.submodule { options = {
-        id = lib.mkOption {
-          type = t.nullOr (t.str);
-          default = null;
-        };
-      }; });
         default = null;
       };
       bootstrapMaxChars = lib.mkOption {
@@ -1788,16 +1774,7 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
-      embeddedHarness = lib.mkOption {
-        type = t.nullOr (t.submodule { options = {
-        runtime = lib.mkOption {
-          type = t.nullOr (t.str);
-          default = null;
-        };
-      }; });
-        default = null;
-      };
-      embeddedPi = lib.mkOption {
+      embeddedAgent = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         executionContract = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "default" ]) (t.enum [ "strict-agentic" ]) ]);
@@ -2743,10 +2720,6 @@ in
       }; });
         default = null;
       };
-      systemPromptOverride = lib.mkOption {
-        type = t.nullOr (t.str);
-        default = null;
-      };
       thinkingDefault = lib.mkOption {
         type = t.nullOr (t.enum [ "off" "minimal" "low" "medium" "high" "xhigh" "adaptive" "max" ]);
         default = null;
@@ -2899,6 +2872,10 @@ in
             type = t.nullOr (t.enum [ "auto" "sandbox" "gateway" "node" ]);
             default = null;
           };
+          mode = lib.mkOption {
+            type = t.nullOr (t.enum [ "deny" "allowlist" "ask" "auto" "full" ]);
+            default = null;
+          };
           node = lib.mkOption {
             type = t.nullOr (t.str);
             default = null;
@@ -2913,6 +2890,28 @@ in
           };
           pathPrepend = lib.mkOption {
             type = t.nullOr (t.listOf (t.str));
+            default = null;
+          };
+          reviewer = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            model = lib.mkOption {
+              type = t.nullOr (t.oneOf [ (t.str) (t.submodule { options = {
+              fallbacks = lib.mkOption {
+                type = t.nullOr (t.listOf (t.str));
+                default = null;
+              };
+              primary = lib.mkOption {
+                type = t.nullOr (t.str);
+                default = null;
+              };
+            }; }) ]);
+              default = null;
+            };
+            timeoutMs = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+          }; });
             default = null;
           };
           safeBinProfiles = lib.mkOption {
@@ -7372,6 +7371,14 @@ in
       }; }));
         default = null;
       };
+      speakerVoice = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
+      speakerVoiceId = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       transport = lib.mkOption {
         type = t.nullOr (t.enum [ "webrtc" "provider-websocket" "gateway-relay" "managed-room" ]);
         default = null;
@@ -7548,6 +7555,10 @@ in
         type = t.nullOr (t.enum [ "auto" "sandbox" "gateway" "node" ]);
         default = null;
       };
+      mode = lib.mkOption {
+        type = t.nullOr (t.enum [ "deny" "allowlist" "ask" "auto" "full" ]);
+        default = null;
+      };
       node = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
@@ -7562,6 +7573,28 @@ in
       };
       pathPrepend = lib.mkOption {
         type = t.nullOr (t.listOf (t.str));
+        default = null;
+      };
+      reviewer = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        model = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.str) (t.submodule { options = {
+          fallbacks = lib.mkOption {
+            type = t.nullOr (t.listOf (t.str));
+            default = null;
+          };
+          primary = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+        }; }) ]);
+          default = null;
+        };
+        timeoutMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+      }; });
         default = null;
       };
       safeBinProfiles = lib.mkOption {

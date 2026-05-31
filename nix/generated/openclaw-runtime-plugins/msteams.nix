@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/msteams";
-  version = "2026.5.27";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/msteams/-/msteams-2026.5.27.tgz";
-  npmIntegrity = "sha512-zKMIt/7Y0JmuYOFIgG1uzXw24Y+jWoRntS7v7WnOArbT7jp5v3ld1/bfuzd195viHd5ViJZ7SftR6VUG/HvVzQ==";
-  npmShasum = "f8e250d63b50a42a9419c7df1aedb7ed895fd8ce";
-  nixHash = "sha256-+jkpQefv/dOSbWtg05tSs9r0oVc5KvTNnOm5KAOOoeM=";
+  version = "2026.5.28";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/msteams/-/msteams-2026.5.28.tgz";
+  npmIntegrity = "sha512-ypH6/hyCP38Qhu8f2mHHfISBSBw9fPNYNLfw8eEYi7OfMKtBpUq5T+X4UhoF3iNtfeaNIzIby0csbS3eO6aYjg==";
+  npmShasum = "d2b76407d6e38d13a567ebf49fd226fe2afedbd6";
+  nixHash = "sha256-7bJhyJExHf1buzLzC2tSRhl2uXno2jnLyTtmm0bx2j8=";
   dependencyMode = "bundled";
   manifestId = "msteams";
-  openclawCompat = ">=2026.5.27";
-  peerOpenClaw = ">=2026.5.27";
+  openclawCompat = ">=2026.5.28";
+  peerOpenClaw = ">=2026.5.28";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -32,11 +32,9 @@
   contracts = { };
   dependencies = {
     "@azure/identity" = "4.13.1";
-    "@microsoft/teams.api" = "2.0.11";
-    "@microsoft/teams.apps" = "2.0.11";
+    "@microsoft/teams.api" = "2.0.12";
+    "@microsoft/teams.apps" = "2.0.12";
     express = "5.2.1";
-    jsonwebtoken = "9.0.3";
-    jwks-rsa = "4.0.1";
     typebox = "1.1.38";
   };
   optionalDependencies = { };
@@ -45,8 +43,6 @@
     "@microsoft/teams.api"
     "@microsoft/teams.apps"
     "express"
-    "jsonwebtoken"
-    "jwks-rsa"
     "typebox"
   ];
   bundledPackageRoots = [
@@ -65,10 +61,6 @@
     "node_modules/@microsoft/teams.apps"
     "node_modules/@microsoft/teams.apps/node_modules/@azure/msal-common"
     "node_modules/@microsoft/teams.apps/node_modules/@azure/msal-node"
-    "node_modules/@microsoft/teams.apps/node_modules/jose"
-    "node_modules/@microsoft/teams.apps/node_modules/jwks-rsa"
-    "node_modules/@microsoft/teams.apps/node_modules/lru-cache"
-    "node_modules/@microsoft/teams.apps/node_modules/lru-memoizer"
     "node_modules/@microsoft/teams.cards"
     "node_modules/@microsoft/teams.common"
     "node_modules/@microsoft/teams.graph"

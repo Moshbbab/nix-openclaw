@@ -817,7 +817,7 @@ const skipped = [];
 const seenCatalogKeys = new Set();
 
 for (const row of rows) {
-  const dedupeKey = `${row.kind}:${row.id ?? row.catalogEntryName ?? ""}`;
+  const dedupeKey = row.id ?? row.catalogEntryName ?? "";
   if (seenCatalogKeys.has(dedupeKey)) {
     skipped.push(skip(row, "duplicate-catalog-row", `duplicate catalog key ${dedupeKey}`));
     continue;

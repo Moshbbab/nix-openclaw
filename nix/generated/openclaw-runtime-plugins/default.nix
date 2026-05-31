@@ -7,8 +7,8 @@
   diagnostics-otel = import ./diagnosticsOtel.nix;
   diagnostics-prometheus = import ./diagnosticsPrometheus.nix;
   diffs = import ./diffs.nix;
+  diffs-language-pack = import ./diffsLanguagePack.nix;
   discord = import ./discord.nix;
-  feishu = import ./feishu.nix;
   google-meet = import ./googleMeet.nix;
   googlechat = import ./googlechat.nix;
   line = import ./line.nix;
@@ -22,6 +22,7 @@
   slack = import ./slack.nix;
   synology-chat = import ./synologyChat.nix;
   tlon = import ./tlon.nix;
+  tokenjuice = import ./tokenjuice.nix;
   twitch = import ./twitch.nix;
   voice-call = import ./voiceCall.nix;
   zalo = import ./zalo.nix;

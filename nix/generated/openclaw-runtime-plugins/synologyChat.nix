@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/synology-chat";
-  version = "2026.5.27";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/synology-chat/-/synology-chat-2026.5.27.tgz";
-  npmIntegrity = "sha512-9iqchSsxtx8kpnrAQmrk0YxfhsUgrv0/TCu2C6mO1XxWaAVI7C/+eHX7ua8h1RFH+i0l5oP1JeQh7SI8miU39A==";
-  npmShasum = "eb6cd43356f1b6dd28b769d5f491b1cc2f397a15";
-  nixHash = "sha256-e+fOdQD38yRrNlOoYdpopEOJG1XT2rzVozTrzEpCVxI=";
+  version = "2026.5.28";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/synology-chat/-/synology-chat-2026.5.28.tgz";
+  npmIntegrity = "sha512-2U/sYb1NCK0TsGaNhQHX7SUvTtsKTdx3CqMVWfBpaMdrRCNk88fDQuGBOeZ85A8IXQIYcBdG8JGPm2a36Z4WTg==";
+  npmShasum = "67dfcb944d2d790621cb183d7157211149e5b053";
+  nixHash = "sha256-egFh5ZkxhBOlFiHs+Vl2Scd6Qwrwmpx1eFMTQOIH2Cg=";
   dependencyMode = "bundled";
   manifestId = "synology-chat";
-  openclawCompat = ">=2026.5.27";
-  peerOpenClaw = ">=2026.5.27";
+  openclawCompat = ">=2026.5.28";
+  peerOpenClaw = ">=2026.5.28";
   runtimeExtensions = [
     "./dist/index.js"
   ];

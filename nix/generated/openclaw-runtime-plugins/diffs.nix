@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.30";
   expectedIntegrity = "";
   packageName = "@openclaw/diffs";
-  version = "2026.5.27";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/diffs/-/diffs-2026.5.27.tgz";
-  npmIntegrity = "sha512-0gcuCGuq+XsHmKTw1Te4Hd23KaV4G7sHcvXiHHNCxHxWhYxyCK+k0+syiLPu73DiIGrHfIwhNkXgxj1Hf0FGew==";
-  npmShasum = "ab252bcc6e0499babb9f28515d775419684921d2";
-  nixHash = "sha256-Xg21Jx1PvOKe55k9fCzwP8O+IbQGRAnQQeLn0x8foWI=";
+  version = "2026.5.28";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/diffs/-/diffs-2026.5.28.tgz";
+  npmIntegrity = "sha512-/qTf5KVPpnQIXb8b/izzg6C+t8fJmYuhnwyexkxTuZvfSL+PNpfgLxm7pLtwED2sgnnttB6I2zFbZDIrLPJL5w==";
+  npmShasum = "7816b45bc92525effca5c8250d1c826192e6985b";
+  nixHash = "sha256-LklL9tLW4Xz3r7X17NhH2Qzx3WbW7YmoDqspvM0BgEU=";
   dependencyMode = "bundled";
   manifestId = "diffs";
-  openclawCompat = ">=2026.5.27";
-  peerOpenClaw = ">=2026.5.27";
+  openclawCompat = ">=2026.5.28";
+  peerOpenClaw = ">=2026.5.28";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -33,8 +33,9 @@
     ];
   };
   dependencies = {
-    "@pierre/diffs" = "1.2.2";
+    "@pierre/diffs" = "1.2.3";
     "@pierre/theme" = "1.0.3";
+    "@shikijs/langs" = "4.1.0";
     playwright-core = "1.60.0";
     typebox = "1.1.38";
     zod = "4.4.3";
@@ -43,6 +44,7 @@
   bundleDependencies = [
     "@pierre/diffs"
     "@pierre/theme"
+    "@shikijs/langs"
     "playwright-core"
     "typebox"
     "zod"
@@ -51,11 +53,16 @@
     "node_modules/@pierre/diffs"
     "node_modules/@pierre/theme"
     "node_modules/@shikijs/core"
+    "node_modules/@shikijs/core/node_modules/@shikijs/types"
     "node_modules/@shikijs/engine-javascript"
+    "node_modules/@shikijs/engine-javascript/node_modules/@shikijs/types"
     "node_modules/@shikijs/engine-oniguruma"
+    "node_modules/@shikijs/engine-oniguruma/node_modules/@shikijs/types"
     "node_modules/@shikijs/langs"
     "node_modules/@shikijs/themes"
+    "node_modules/@shikijs/themes/node_modules/@shikijs/types"
     "node_modules/@shikijs/transformers"
+    "node_modules/@shikijs/transformers/node_modules/@shikijs/types"
     "node_modules/@shikijs/types"
     "node_modules/@shikijs/vscode-textmate"
     "node_modules/@types/hast"
@@ -87,6 +94,8 @@
     "node_modules/regex-recursion"
     "node_modules/regex-utilities"
     "node_modules/shiki"
+    "node_modules/shiki/node_modules/@shikijs/langs"
+    "node_modules/shiki/node_modules/@shikijs/types"
     "node_modules/space-separated-tokens"
     "node_modules/stringify-entities"
     "node_modules/trim-lines"

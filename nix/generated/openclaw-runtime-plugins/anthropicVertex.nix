@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.5.12-beta.1";
   expectedIntegrity = "";
   packageName = "@openclaw/anthropic-vertex-provider";
-  version = "2026.5.27";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/anthropic-vertex-provider/-/anthropic-vertex-provider-2026.5.27.tgz";
-  npmIntegrity = "sha512-cVEdYfxhXmIL6CgfUMSUeKMcixmF4RPlu4s71gNocYO5C5WuZhWRAwDUPpVCSrnAY3F/2NAS3K2Tn1iJtHCkbQ==";
-  npmShasum = "39e259bc8c0f6d3154d356c0e5278345de40ffc9";
-  nixHash = "sha256-aP+HcllrDhwbXdIeYvvvFvhrtU3lrEaJC6AxsrRfbDE=";
+  version = "2026.5.28";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/anthropic-vertex-provider/-/anthropic-vertex-provider-2026.5.28.tgz";
+  npmIntegrity = "sha512-Gj8chyyKivEyo4r3x5UK3KyCNC84lI/8KKvaMkpLlqiG7emCDbjaV6PU8aWRMr9auWhPBD/LBXA5zOq13uIIDw==";
+  npmShasum = "93176905ac8a48cbc30541dff078dd3d01c3a03f";
+  nixHash = "sha256-M9Gg6ZR9foqYxhJKdYAB0KRHgXh7gw2X88yA5LAe1dk=";
   dependencyMode = "bundled";
   manifestId = "anthropic-vertex";
-  openclawCompat = ">=2026.5.27";
-  peerOpenClaw = ">=2026.5.27";
+  openclawCompat = ">=2026.5.28";
+  peerOpenClaw = ">=2026.5.28";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -30,117 +30,43 @@
   contracts = { };
   dependencies = {
     "@anthropic-ai/vertex-sdk" = "0.16.1";
-    "@earendil-works/pi-agent-core" = "0.75.5";
-    "@earendil-works/pi-ai" = "0.75.5";
   };
   optionalDependencies = { };
   bundleDependencies = [
     "@anthropic-ai/vertex-sdk"
-    "@earendil-works/pi-agent-core"
-    "@earendil-works/pi-ai"
   ];
   bundledPackageRoots = [
     "node_modules/@anthropic-ai/sdk"
     "node_modules/@anthropic-ai/vertex-sdk"
-    "node_modules/@aws/lambda-invoke-store"
-    "node_modules/@aws-crypto/crc32"
-    "node_modules/@aws-crypto/sha256-browser"
-    "node_modules/@aws-crypto/sha256-js"
-    "node_modules/@aws-crypto/supports-web-crypto"
-    "node_modules/@aws-crypto/util"
-    "node_modules/@aws-sdk/client-bedrock-runtime"
-    "node_modules/@aws-sdk/core"
-    "node_modules/@aws-sdk/credential-provider-env"
-    "node_modules/@aws-sdk/credential-provider-http"
-    "node_modules/@aws-sdk/credential-provider-ini"
-    "node_modules/@aws-sdk/credential-provider-login"
-    "node_modules/@aws-sdk/credential-provider-node"
-    "node_modules/@aws-sdk/credential-provider-process"
-    "node_modules/@aws-sdk/credential-provider-sso"
-    "node_modules/@aws-sdk/credential-provider-web-identity"
-    "node_modules/@aws-sdk/eventstream-handler-node"
-    "node_modules/@aws-sdk/middleware-eventstream"
-    "node_modules/@aws-sdk/middleware-websocket"
-    "node_modules/@aws-sdk/nested-clients"
-    "node_modules/@aws-sdk/signature-v4-multi-region"
-    "node_modules/@aws-sdk/token-providers"
-    "node_modules/@aws-sdk/types"
-    "node_modules/@aws-sdk/util-locate-window"
-    "node_modules/@aws-sdk/xml-builder"
     "node_modules/@babel/runtime"
-    "node_modules/@earendil-works/pi-agent-core"
-    "node_modules/@earendil-works/pi-ai"
-    "node_modules/@google/genai"
-    "node_modules/@google/genai/node_modules/gaxios"
-    "node_modules/@google/genai/node_modules/gcp-metadata"
-    "node_modules/@google/genai/node_modules/google-auth-library"
-    "node_modules/@google/genai/node_modules/google-logging-utils"
-    "node_modules/@google/genai/node_modules/node-fetch"
-    "node_modules/@mistralai/mistralai"
-    "node_modules/@nodable/entities"
-    "node_modules/@smithy/core"
-    "node_modules/@smithy/credential-provider-imds"
-    "node_modules/@smithy/fetch-http-handler"
-    "node_modules/@smithy/is-array-buffer"
-    "node_modules/@smithy/node-http-handler"
-    "node_modules/@smithy/signature-v4"
-    "node_modules/@smithy/types"
-    "node_modules/@smithy/util-buffer-from"
-    "node_modules/@smithy/util-utf8"
     "node_modules/@stablelib/base64"
-    "node_modules/@types/retry"
     "node_modules/agent-base"
     "node_modules/base64-js"
     "node_modules/bignumber.js"
-    "node_modules/bowser"
     "node_modules/buffer-equal-constant-time"
-    "node_modules/data-uri-to-buffer"
     "node_modules/debug"
     "node_modules/ecdsa-sig-formatter"
     "node_modules/extend"
     "node_modules/fast-sha256"
-    "node_modules/fast-xml-builder"
-    "node_modules/fast-xml-parser"
-    "node_modules/fetch-blob"
-    "node_modules/formdata-polyfill"
     "node_modules/gaxios"
     "node_modules/gcp-metadata"
     "node_modules/google-auth-library"
     "node_modules/google-logging-utils"
     "node_modules/gtoken"
-    "node_modules/http-proxy-agent"
     "node_modules/https-proxy-agent"
-    "node_modules/ignore"
     "node_modules/is-stream"
     "node_modules/json-bigint"
     "node_modules/json-schema-to-ts"
     "node_modules/jwa"
     "node_modules/jws"
-    "node_modules/long"
     "node_modules/ms"
-    "node_modules/node-domexception"
     "node_modules/node-fetch"
-    "node_modules/openai"
-    "node_modules/p-retry"
-    "node_modules/partial-json"
-    "node_modules/path-expression-matcher"
-    "node_modules/protobufjs"
-    "node_modules/retry"
     "node_modules/safe-buffer"
     "node_modules/standardwebhooks"
-    "node_modules/strnum"
     "node_modules/tr46"
     "node_modules/ts-algebra"
-    "node_modules/tslib"
-    "node_modules/typebox"
     "node_modules/uuid"
-    "node_modules/web-streams-polyfill"
     "node_modules/webidl-conversions"
     "node_modules/whatwg-url"
-    "node_modules/ws"
-    "node_modules/xml-naming"
-    "node_modules/yaml"
-    "node_modules/zod"
-    "node_modules/zod-to-json-schema"
   ];
 }

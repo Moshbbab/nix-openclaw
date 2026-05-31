@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.5.12-beta.1";
   expectedIntegrity = "";
   packageName = "@openclaw/amazon-bedrock-provider";
-  version = "2026.5.27";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/amazon-bedrock-provider/-/amazon-bedrock-provider-2026.5.27.tgz";
-  npmIntegrity = "sha512-zn50+/yKIIySVWwGmdklH20UC4Ttq7hSOizO4WOrkyS35PzoxWFymf4rSwOfQWlxfB7HwNQgtykhAy7R9Kgrnw==";
-  npmShasum = "bcef4b17812a5f6d8bae8c65b2e43a6442d64676";
-  nixHash = "sha256-DVFsnUmRplTN+bRqTORwRrwpMp//ZpdX9vVZhrXybcw=";
+  version = "2026.5.28";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/amazon-bedrock-provider/-/amazon-bedrock-provider-2026.5.28.tgz";
+  npmIntegrity = "sha512-bbuWGMwAzBQ7upJrcJIXYEOdAvafUHXjsqSeLrzUnXvRzSJYZc9XlSxs7L9ZrtOHlcFfLCJeYHW4e9QbtRzBhQ==";
+  npmShasum = "af3233b96a2cdeff84794fe6a51c4e53680e3a23";
+  nixHash = "sha256-vhXkpP6lYYtokA+2haiC/w7hykKANdXAtcGaBJ9XCxI=";
   dependencyMode = "bundled";
   manifestId = "amazon-bedrock";
-  openclawCompat = ">=2026.5.27";
-  peerOpenClaw = ">=2026.5.27";
+  openclawCompat = ">=2026.5.28";
+  peerOpenClaw = ">=2026.5.28";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -36,19 +36,20 @@
     "@aws-sdk/client-bedrock" = "3.1053.0";
     "@aws-sdk/client-bedrock-runtime" = "3.1053.0";
     "@aws-sdk/credential-provider-node" = "3.972.44";
-    "@earendil-works/pi-ai" = "0.75.5";
+    "@smithy/node-http-handler" = "4.7.4";
     "@smithy/shared-ini-file-loader" = "4.5.4";
+    "@smithy/types" = "4.14.2";
   };
   optionalDependencies = { };
   bundleDependencies = [
     "@aws-sdk/client-bedrock"
     "@aws-sdk/client-bedrock-runtime"
     "@aws-sdk/credential-provider-node"
-    "@earendil-works/pi-ai"
+    "@smithy/node-http-handler"
     "@smithy/shared-ini-file-loader"
+    "@smithy/types"
   ];
   bundledPackageRoots = [
-    "node_modules/@anthropic-ai/sdk"
     "node_modules/@aws/lambda-invoke-store"
     "node_modules/@aws-crypto/crc32"
     "node_modules/@aws-crypto/sha256-browser"
@@ -65,6 +66,7 @@
     "node_modules/@aws-sdk/credential-provider-node"
     "node_modules/@aws-sdk/credential-provider-process"
     "node_modules/@aws-sdk/credential-provider-sso"
+    "node_modules/@aws-sdk/credential-provider-sso/node_modules/@aws-sdk/token-providers"
     "node_modules/@aws-sdk/credential-provider-web-identity"
     "node_modules/@aws-sdk/eventstream-handler-node"
     "node_modules/@aws-sdk/middleware-eventstream"
@@ -75,10 +77,6 @@
     "node_modules/@aws-sdk/types"
     "node_modules/@aws-sdk/util-locate-window"
     "node_modules/@aws-sdk/xml-builder"
-    "node_modules/@babel/runtime"
-    "node_modules/@earendil-works/pi-ai"
-    "node_modules/@google/genai"
-    "node_modules/@mistralai/mistralai"
     "node_modules/@nodable/entities"
     "node_modules/@smithy/core"
     "node_modules/@smithy/credential-provider-imds"
@@ -90,52 +88,12 @@
     "node_modules/@smithy/types"
     "node_modules/@smithy/util-buffer-from"
     "node_modules/@smithy/util-utf8"
-    "node_modules/@stablelib/base64"
-    "node_modules/@types/retry"
-    "node_modules/agent-base"
-    "node_modules/base64-js"
-    "node_modules/bignumber.js"
     "node_modules/bowser"
-    "node_modules/buffer-equal-constant-time"
-    "node_modules/data-uri-to-buffer"
-    "node_modules/debug"
-    "node_modules/ecdsa-sig-formatter"
-    "node_modules/extend"
-    "node_modules/fast-sha256"
     "node_modules/fast-xml-builder"
     "node_modules/fast-xml-parser"
-    "node_modules/fetch-blob"
-    "node_modules/formdata-polyfill"
-    "node_modules/gaxios"
-    "node_modules/gcp-metadata"
-    "node_modules/google-auth-library"
-    "node_modules/google-logging-utils"
-    "node_modules/http-proxy-agent"
-    "node_modules/https-proxy-agent"
-    "node_modules/json-bigint"
-    "node_modules/json-schema-to-ts"
-    "node_modules/jwa"
-    "node_modules/jws"
-    "node_modules/long"
-    "node_modules/ms"
-    "node_modules/node-domexception"
-    "node_modules/node-fetch"
-    "node_modules/openai"
-    "node_modules/p-retry"
-    "node_modules/partial-json"
     "node_modules/path-expression-matcher"
-    "node_modules/protobufjs"
-    "node_modules/retry"
-    "node_modules/safe-buffer"
-    "node_modules/standardwebhooks"
     "node_modules/strnum"
-    "node_modules/ts-algebra"
     "node_modules/tslib"
-    "node_modules/typebox"
-    "node_modules/web-streams-polyfill"
-    "node_modules/ws"
     "node_modules/xml-naming"
-    "node_modules/zod"
-    "node_modules/zod-to-json-schema"
   ];
 }
