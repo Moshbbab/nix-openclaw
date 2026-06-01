@@ -115,7 +115,7 @@ log_step "node $tsdown_cli" env \
   node "$tsdown_cli" --config-loader unrun --logLevel warn
 log_step "node scripts/build-stamp.mjs" node scripts/build-stamp.mjs
 log_step "node $tsc_cli" env NODE_OPTIONS="$tsc_node_options" node "$tsc_cli" -p tsconfig.plugin-sdk.dts.json
-log_step "node --import tsx scripts/write-plugin-sdk-entry-dts.ts" node --import tsx scripts/write-plugin-sdk-entry-dts.ts
+log_step "node --import tsx scripts/write-plugin-sdk-entry-dts.ts" env NODE_OPTIONS="$tsc_node_options" node --import tsx scripts/write-plugin-sdk-entry-dts.ts
 if [ -f "scripts/copy-plugin-sdk-root-alias.mjs" ]; then
   log_step "node scripts/copy-plugin-sdk-root-alias.mjs" node scripts/copy-plugin-sdk-root-alias.mjs
 fi

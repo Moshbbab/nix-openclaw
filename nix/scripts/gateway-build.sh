@@ -170,7 +170,7 @@ if [ -f "scripts/stage-bundled-plugin-runtime.mjs" ]; then
   log_step "build: stage bundled plugin runtime" node scripts/stage-bundled-plugin-runtime.mjs
 fi
 log_step "build: plugin-sdk dts" env NODE_OPTIONS="$tsc_node_options" node "$tsc_cli" -p tsconfig.plugin-sdk.dts.json
-log_step "build: write-plugin-sdk-entry-dts" node --import tsx scripts/write-plugin-sdk-entry-dts.ts
+log_step "build: write-plugin-sdk-entry-dts" env NODE_OPTIONS="$tsc_node_options" node --import tsx scripts/write-plugin-sdk-entry-dts.ts
 if [ -f "scripts/copy-plugin-sdk-root-alias.mjs" ]; then
   log_step "build: copy-plugin-sdk-root-alias" node scripts/copy-plugin-sdk-root-alias.mjs
 fi
