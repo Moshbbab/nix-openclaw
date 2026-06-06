@@ -29,6 +29,7 @@ plugin PR.
 | `pr100-on99-ci-apply-split-2026-06-05` | `ba3b6e65b07d` | `e93b21ed88e0` | split default CI/apply proof from exhaustive plugin catalog packaging | default CI schedules far less work while retaining explicit catalog proof |
 | `pr100-remote-ci-cache-2026-06-06` | `51aff7a59ba20` | `9d0ae60e8cbc` | measure real GitHub Actions/Garnix behavior and stop duplicate PR branch CI | one PR-branch workflow per SHA, cache behavior characterized |
 | `pr100-macos-hm-cache-split-2026-06-06` | `9d0ae60e8cbc` | `d7b1bca93146` | move macOS HM activation package into the cacheable flake check graph | fewer remote built derivations while retaining launchd/apply proof |
+| `pr100-ci-meter-2026-06-06` | `3b70138463a9` | `5733ebdf9ed4` | add Nix build metering to opaque CI aggregate steps | no graph change; remaining cost is substitution volume plus 29 Linux proof drvs |
 
 ## Runs
 
@@ -338,6 +339,74 @@ Remote proof for measured commit:
   `2026-06-05T23:42:21Z` to `2026-06-05T23:44:57Z`.
 - PR status at measured commit: `CLEAN`; all GitHub Actions, Garnix, Socket,
   and flake-evaluation checks passed.
+
+### `pr100-ci-meter-2026-06-06`
+
+- PR: `#100`
+- Measured commit: `5733ebdf9ed4597b8713d775fe6f0eefdbdc5a6a`
+- Base commit: `3b70138463a962ae82fa9116f7f929c43440c7a9`
+- Purpose:
+  - wrap the Linux and Darwin aggregate `nix build` steps with a log tee and
+    compact summary;
+  - expose planned fetches, copied paths, built derivations, input fetches,
+    warnings, and elapsed time in the GitHub step summary;
+  - keep the check graph and build arguments unchanged.
+- Tooling decision:
+  - `nix-output-monitor` is useful locally, especially with Nix JSON logs, but
+    the CI path avoids a new runtime dependency and keeps raw Nix logs intact.
+  - `nix-fast-build --skip-cached` is relevant for future cache-presence probes,
+    but it can skip downloading cached outputs. That is not the default
+    install/apply proof contract in this PR.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Remote CI wall time to completed PR run | `27046069426` at `3b701384` | 163s | `27046898805` at `5733ebdf` | 146s | 10.4% faster, variance only | `gh run view <run> --json createdAt,updatedAt` |
+| Linux GitHub job duration | `27046069426` | 140s | `27046898805` | 133s | 5.0% faster, variance only | `gh run view <run> --json jobs` |
+| macOS GitHub job duration | `27046069426` | 160s | `27046898805` | 144s | 10.0% faster, variance only | same |
+| Linux CI aggregate step | `27046069426` | 129s | `27046898805` | 126s | 2.3% faster, variance only | same |
+| macOS Darwin aggregate step | `27046069426` | 93s | `27046898805` | 81s | 12.9% faster, variance only | same |
+| macOS HM activation step | `27046069426` | 24s | `27046898805` | 20s | 16.7% faster, variance only | same |
+| Total built derivation log lines | parsed log for `27046069426` | 33 | parsed log for `27046898805` | 33 | unchanged | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Total copied path log lines | parsed log for `27046069426` | 1,168 | parsed log for `27046898805` | 1,168 | unchanged | same |
+| Linux aggregate fetch plan | parsed log for `27046069426` | 932 paths, 1.2 GiB download, 5.2 GiB unpacked | parsed log for `27046898805` | 932 paths, 1.2 GiB download, 5.2 GiB unpacked | unchanged | same |
+| Darwin aggregate fetch plan | parsed log for `27046069426` | 227 paths, 286 MiB download, 1.8 GiB unpacked | parsed log for `27046898805` | 227 paths, 286 MiB download, 1.8 GiB unpacked | unchanged | same |
+| Metered aggregate workflow calls | `3b701384` workflows | 0 | `5733ebdf` workflows | 4 | added | `rg -o 'scripts/ci-nix-build\\.sh .*checks\\.(x86_64-linux\|aarch64-darwin)\\.ci' .github/workflows/*.yml \| wc -l` |
+| Direct unmetered aggregate `nix build` run calls | `3b701384` workflows | 4 | `5733ebdf` workflows | 0 | removed | `rg -o 'run: (timeout --foreground 50m )?nix build .*checks\\.(x86_64-linux\|aarch64-darwin)\\.ci' .github/workflows/*.yml \| wc -l` |
+
+Metered remote profile at `5733ebdf`:
+
+| Step | Seconds | Fetch plan | Planned builds | Copied paths | Built drvs | Copy sources |
+| --- | ---: | --- | ---: | ---: | ---: | --- |
+| Linux aggregate | 126 | 932 paths, 1.2 GiB download, 5.2 GiB unpacked | 29 | 937 | 29 | cache.nixos.org 887, cache.garnix.io 50 |
+| Darwin aggregate | 81 | 227 paths, 286 MiB download, 1.8 GiB unpacked | 0 | 231 | 0 | cache.nixos.org 138, install.determinate.systems 59, cache.garnix.io 34 |
+| macOS HM activation | 20 | none | 0 | 0 | 1 | none |
+
+Interpretation:
+
+- This change adds observability, not a claimed performance improvement.
+- The unchanged built/copy profile shows the wrapper did not alter the package
+  graph.
+- The remaining CI hot spot is cold-runner substitution volume: Linux copies
+  5.2 GiB unpacked before building the 29 Linux proof derivations; Darwin
+  copies 1.8 GiB unpacked and builds no aggregate derivations.
+- Next improvement candidates should target cache topology and Linux proof
+  derivations, not more macOS aggregate splitting.
+
+Local proof for measured commit:
+
+- `node --check scripts/summarize-nix-build-log.mjs`
+- `bash -n scripts/ci-nix-build.sh`
+- `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-27046069426.log`
+- `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci --accept-flake-config --no-link .#checks.aarch64-darwin.ci`
+- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path) }; puts "yaml ok"' .github/workflows/ci.yml .github/workflows/pin-stable-openclaw-version.yml garnix.yaml`
+- `git diff --check`
+
+Remote proof for measured commit:
+
+- `27046898805`, success, `pull_request`,
+  `2026-06-06T00:15:29Z` to `2026-06-06T00:17:55Z`.
+- PR checks at measured commit: GitHub Actions Linux/macOS pass; Garnix
+  flake evaluation, Darwin `ci`, and selected package targets pass.
 
 ## Add A Run
 
