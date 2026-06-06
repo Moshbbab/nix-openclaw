@@ -71,6 +71,29 @@ function emptyGroup(label) {
     builtNames: new Map(),
     unpackedInputs: 0,
     warningCount: 0,
+    firstSignalTimestamp: null,
+    firstFetchPlanTimestamp: null,
+    firstBuildPlanTimestamp: null,
+    firstCopyTimestamp: null,
+    lastCopyTimestamp: null,
+    firstBuildTimestamp: null,
+    lastBuildTimestamp: null,
+    firstInputFetchTimestamp: null,
+    evalStatsSection: null,
+    evalStats: {
+      cpuSeconds: null,
+      gcFraction: null,
+      waitingSeconds: null,
+      expressions: null,
+      thunks: null,
+      functionCalls: null,
+      primOpCalls: null,
+      values: null,
+      sets: null,
+      envs: null,
+      lists: null,
+      symbols: null,
+    },
   };
 }
 
@@ -82,26 +105,36 @@ function recordLine(group, rawLine) {
   }
 
   const line = stripNixJsonPrefix(message);
+  recordEvalStats(group, line);
 
   const fetchPlan = line.match(
     /these ([0-9]+) paths will be fetched \(([^,]+) download, ([^)]+) unpacked\)/,
   );
   if (fetchPlan) {
+    markSignal(group, timestamp);
+    group.firstFetchPlanTimestamp ||= timestamp;
     group.fetchPlanCount += Number(fetchPlan[1]);
     group.fetchDownloadBytes += parseSize(fetchPlan[2]);
     group.fetchUnpackedBytes += parseSize(fetchPlan[3]);
   }
 
   if (/^this derivation will be built:/.test(line)) {
+    markSignal(group, timestamp);
+    group.firstBuildPlanTimestamp ||= timestamp;
     group.buildPlanCount += 1;
   }
   const buildPlan = line.match(/^these ([0-9]+) derivations will be built:/);
   if (buildPlan) {
+    markSignal(group, timestamp);
+    group.firstBuildPlanTimestamp ||= timestamp;
     group.buildPlanCount += Number(buildPlan[1]);
   }
 
   const copied = line.match(/copying path '([^']+)' from '([^']+)'/);
   if (copied) {
+    markSignal(group, timestamp);
+    group.firstCopyTimestamp ||= timestamp;
+    group.lastCopyTimestamp = timestamp || group.lastCopyTimestamp;
     group.copiedPathLines += 1;
     group.copiedPaths.add(copied[1]);
     group.copySources.set(copied[2], (group.copySources.get(copied[2]) || 0) + 1);
@@ -109,6 +142,9 @@ function recordLine(group, rawLine) {
 
   const built = line.match(/building '([^']+\.drv)'/);
   if (built) {
+    markSignal(group, timestamp);
+    group.firstBuildTimestamp ||= timestamp;
+    group.lastBuildTimestamp = timestamp || group.lastBuildTimestamp;
     group.builtDrvLines += 1;
     group.builtDrvs.add(built[1]);
     const name = drvName(built[1]);
@@ -116,12 +152,80 @@ function recordLine(group, rawLine) {
   }
 
   if (/unpacking ['"][^'"]+['"] into the Git cache/.test(line)) {
+    markSignal(group, timestamp);
+    group.firstInputFetchTimestamp ||= timestamp;
     group.unpackedInputs += 1;
   }
 
   if (/\bwarning:/.test(line)) {
+    markSignal(group, timestamp);
     group.warningCount += 1;
   }
+}
+
+function markSignal(group, timestamp) {
+  if (timestamp) {
+    group.firstSignalTimestamp ||= timestamp;
+  }
+}
+
+function recordEvalStats(group, line) {
+  const section = line.match(/^\s*"([^"]+)":\s*\{\s*,?$/);
+  if (section) {
+    group.evalStatsSection = section[1];
+    return;
+  }
+  if (/^\s*}\s*,?\s*$/.test(line)) {
+    group.evalStatsSection = null;
+    return;
+  }
+
+  const topLevelStats = {
+    cpuTime: "cpuSeconds",
+    nrExprs: "expressions",
+    nrFunctionCalls: "functionCalls",
+    nrPrimOpCalls: "primOpCalls",
+    nrThunks: "thunks",
+    waitingTime: "waitingSeconds",
+  };
+  for (const [key, field] of Object.entries(topLevelStats)) {
+    const value = matchJsonNumber(line, key);
+    if (value !== null) {
+      group.evalStats[field] = value;
+    }
+  }
+
+  if (group.evalStatsSection === "time") {
+    const gcFraction = matchJsonNumber(line, "gcFraction");
+    if (gcFraction !== null) {
+      group.evalStats.gcFraction = gcFraction;
+    }
+  }
+
+  const sectionCounts = {
+    values: "values",
+    sets: "sets",
+    envs: "envs",
+    list: "lists",
+    symbols: "symbols",
+  };
+  const sectionField = sectionCounts[group.evalStatsSection];
+  if (sectionField) {
+    const count = matchJsonNumber(line, "number");
+    if (count !== null) {
+      group.evalStats[sectionField] = count;
+    }
+  }
+}
+
+function matchJsonNumber(line, key) {
+  const pattern = new RegExp(`^\\s*"${escapeRegExp(key)}":\\s*([0-9]+(?:\\.[0-9]+)?)\\s*,?\\s*$`);
+  const match = line.match(pattern);
+  return match ? Number(match[1]) : null;
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function splitTimestamp(line) {
@@ -241,10 +345,20 @@ function render(groups, title) {
   }
 
   const details = finished.filter(
-    (group) => group.builtNames.size > 0 || group.copySources.size > 0,
+    (group) =>
+      group.builtNames.size > 0 ||
+      group.copySources.size > 0 ||
+      hasPhaseHints(group) ||
+      hasEvalStats(group),
   );
   for (const group of details) {
     lines.push("", `#### ${group.label}`, "");
+    if (hasPhaseHints(group)) {
+      lines.push(`Phase hints: ${formatPhaseHints(group)}`);
+    }
+    if (hasEvalStats(group)) {
+      lines.push(`Eval stats: ${formatEvalStats(group.evalStats)}`);
+    }
     if (group.copySources.size > 0) {
       lines.push(`Copy sources: ${formatTopMap(group.copySources, 4)}`);
     }
@@ -300,6 +414,88 @@ function formatTopMap(map, limit) {
     shown.push(`and ${hidden} more`);
   }
   return shown.join(", ");
+}
+
+function hasPhaseHints(group) {
+  return Boolean(
+    group.firstTimestamp &&
+      (group.firstInputFetchTimestamp ||
+        group.firstFetchPlanTimestamp ||
+        group.firstBuildPlanTimestamp ||
+        group.firstCopyTimestamp ||
+        group.firstBuildTimestamp),
+  );
+}
+
+function formatPhaseHints(group) {
+  const base = group.firstTimestamp;
+  const hints = [];
+  pushOffset(hints, "input fetch", base, group.firstInputFetchTimestamp);
+  pushOffset(hints, "fetch plan", base, group.firstFetchPlanTimestamp);
+  pushOffset(hints, "build plan", base, group.firstBuildPlanTimestamp);
+  pushWindow(hints, "copy", base, group.firstCopyTimestamp, group.lastCopyTimestamp);
+  pushWindow(hints, "build", base, group.firstBuildTimestamp, group.lastBuildTimestamp);
+  return hints.join(", ");
+}
+
+function pushOffset(hints, label, base, timestamp) {
+  if (timestamp) {
+    hints.push(`${label} +${formatOffset(base, timestamp)}`);
+  }
+}
+
+function pushWindow(hints, label, base, start, end) {
+  if (!start) {
+    return;
+  }
+  const startOffset = formatOffset(base, start);
+  if (!end || end === start) {
+    hints.push(`${label} +${startOffset}`);
+    return;
+  }
+  hints.push(`${label} +${startOffset}..+${formatOffset(base, end)}`);
+}
+
+function formatOffset(base, timestamp) {
+  const seconds = (Date.parse(timestamp) - Date.parse(base)) / 1000;
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "?s";
+  }
+  return formatSeconds(seconds);
+}
+
+function hasEvalStats(group) {
+  return Object.values(group.evalStats).some((value) => value !== null);
+}
+
+function formatEvalStats(stats) {
+  const fields = [];
+  if (stats.cpuSeconds !== null) {
+    fields.push(`cpu ${formatSeconds(stats.cpuSeconds)}s`);
+  }
+  if (stats.gcFraction !== null) {
+    fields.push(`gc ${(stats.gcFraction * 100).toFixed(1)}%`);
+  }
+  if (stats.thunks !== null) {
+    fields.push(`thunks ${formatCount(stats.thunks)}`);
+  }
+  if (stats.values !== null) {
+    fields.push(`values ${formatCount(stats.values)}`);
+  }
+  if (stats.functionCalls !== null) {
+    fields.push(`calls ${formatCount(stats.functionCalls)}`);
+  }
+  if (stats.primOpCalls !== null) {
+    fields.push(`primops ${formatCount(stats.primOpCalls)}`);
+  }
+  if (stats.waitingSeconds !== null) {
+    fields.push(`waiting ${formatSeconds(stats.waitingSeconds)}s`);
+  }
+  return fields.join(", ");
+}
+
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(value);
 }
 
 try {

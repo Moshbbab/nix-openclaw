@@ -34,14 +34,6 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v31
 
-      - name: Cache Nix store
-        if: runner.os == 'Linux'
-        uses: DeterminateSystems/magic-nix-cache-action@v14
-        with:
-          use-gha-cache: enabled
-          use-flakehub: disabled
-          diagnostic-endpoint: ""
-
       - name: Run Linux CI aggregator
         run: timeout --foreground 50m scripts/ci-nix-build.sh linux-ci .#checks.x86_64-linux.ci --accept-flake-config
 
@@ -60,14 +52,6 @@ jobs:
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v22
-
-      - name: Cache Nix store
-        if: runner.os == 'Linux'
-        uses: DeterminateSystems/magic-nix-cache-action@v14
-        with:
-          use-gha-cache: enabled
-          use-flakehub: disabled
-          diagnostic-endpoint: ""
 
       - name: Build Darwin CI aggregator
         timeout-minutes: 25
