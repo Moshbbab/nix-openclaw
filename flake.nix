@@ -169,6 +169,7 @@
                   ];
                 }).activationPackage;
             };
+            ciChecks = builtins.removeAttrs stableChecks [ "gateway" ];
           in
           stableChecks
           // qmdChecks
@@ -186,7 +187,7 @@
               paths = [
                 packageSetStable.openclaw
               ]
-              ++ (builtins.attrValues stableChecks)
+              ++ (builtins.attrValues ciChecks)
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux (builtins.attrValues linuxOnlyChecks)
               ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isDarwin (builtins.attrValues darwinOnlyChecks);
             };
