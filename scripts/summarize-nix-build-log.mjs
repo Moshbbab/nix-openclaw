@@ -206,6 +206,7 @@ function recordNixJsonEvent(group, timestamp, event) {
   if (event.action === "start") {
     group.internalJson.starts += 1;
     const type = nixActivityTypeName(event.type);
+    recordNixJsonBuildStart(group, timestamp, type, event);
     group.internalJson.startTypes.set(
       type,
       (group.internalJson.startTypes.get(type) || 0) + 1,
@@ -229,6 +230,9 @@ function recordNixJsonEvent(group, timestamp, event) {
       active.durationSeconds = durationSeconds(active.startedAt, timestamp);
       group.internalJson.completed.push(active);
       group.internalJson.active.delete(event.id);
+      if (active.type === "Build" && timestamp) {
+        group.lastBuildTimestamp = timestamp;
+      }
     }
     return;
   }
@@ -240,6 +244,26 @@ function recordNixJsonEvent(group, timestamp, event) {
       active.lastPhase = String(event.fields[0] || "");
     }
   }
+}
+
+function recordNixJsonBuildStart(group, timestamp, type, event) {
+  if (type !== "Build" || !Array.isArray(event.fields)) {
+    return;
+  }
+  const drvPath = event.fields.find(
+    (field) => typeof field === "string" && field.endsWith(".drv"),
+  );
+  if (!drvPath) {
+    return;
+  }
+
+  markSignal(group, timestamp);
+  group.firstBuildTimestamp ||= timestamp;
+  group.lastBuildTimestamp = timestamp || group.lastBuildTimestamp;
+  group.builtDrvLines += 1;
+  group.builtDrvs.add(drvPath);
+  const name = drvName(drvPath);
+  group.builtNames.set(name, (group.builtNames.get(name) || 0) + 1);
 }
 
 function nixActivityTypeName(type) {
