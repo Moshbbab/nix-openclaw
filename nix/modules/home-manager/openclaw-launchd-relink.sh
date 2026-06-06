@@ -23,7 +23,9 @@ link_agent() {
     /bin/mkdir -p "${target%/*}"
     /bin/ln -sfn "$candidate" "$target"
     /bin/launchctl bootout "gui/$UID" "$target" 2>/dev/null || true
-    /bin/launchctl bootstrap "gui/$UID" "$target" 2>/dev/null || true
+    if /bin/launchctl bootstrap "gui/$UID" "$target" 2>/dev/null; then
+      return 0
+    fi
   fi
 
   /bin/launchctl kickstart -k "gui/$UID/$label" 2>/dev/null || true
