@@ -20,6 +20,39 @@ plugin PR.
   value, and change.
 - Keep each run small: purpose, commit/store provenance, metrics, proof.
 
+## Build Analysis Toolbox
+
+Checked on 2026-06-06 with Determinate Nix `3.21.0` / Nix `2.34.6` and pinned
+nixpkgs `16c7794d0a28b5a37904d55bcca36003b9109aaa`.
+
+- Default CI meter:
+  - keep timestamped raw Nix stderr plus `NIX_SHOW_STATS=1`;
+  - this preserves exact copy-source lines, build lines, warning text, phase
+    hints, and evaluator counters in a commit-tied summary.
+- Structured drill-down:
+  - use `nix build --log-format internal-json` with the same timestamp sidecar
+    when text scraping is ambiguous;
+  - `json-log-path` records the same event stream but does not include
+    timestamps, so it is not enough by itself for phase-duration attribution;
+  - `nix-output-monitor` / `nom` is the best local human display for this
+    stream, but CI should keep machine-readable summaries and raw logs.
+- Cache/eval probes:
+  - use `nix-eval-jobs --check-cache-status` for explicit local/cached/not-built
+    attribution across many attrs;
+  - use `nix-fast-build` for separate cache-presence experiments, not the
+    default proof path, because skip-cached modes can stop proving the cold
+    install/apply closure copy behavior users hit.
+- Closure and dependency drill-down:
+  - use `nix path-info --json --recursive --size --closure-size` for closure
+    top offenders;
+  - use `nix derivation show` for input-derivation fan-out;
+  - use `nix why-depends`, `nix-diff`, `nix-tree`, `nix-du`, and `nvd` when a
+    path appears unexpectedly or a closure/derivation changes.
+- Deep evaluator profiling:
+  - `NIX_SHOW_STATS=1` belongs in CI summaries;
+  - `trace-function-calls` flamegraphs are local-only drill-down because they
+    are too noisy for PR proof unless a specific evaluator hotspot is suspected.
+
 ## Run Index
 
 | Run | Base | Measured | Purpose | Result |
@@ -32,6 +65,8 @@ plugin PR.
 | `pr100-ci-meter-2026-06-06` | `3b70138463a9` | `5733ebdf9ed4` | add Nix build metering to opaque CI aggregate steps | no graph change; remaining cost is substitution volume plus 29 Linux proof drvs |
 | `pr100-gha-cache-rejected-2026-06-06` | `886ad5710ac1` | `a05e9981c943` | test Magic Nix Cache as a GitHub Actions Nix cache layer | rejected: Linux slower, macOS cache startup blocked proof |
 | `pr100-nix-eval-telemetry-2026-06-06` | `a05e9981c943` | `4d4ec0996548` | replace rejected cache action with Nix eval and phase telemetry | no graph change; eval cost is now visible in CI summaries |
+| `pr100-on99-latest-restack-2026-06-06` | `c31825060717` | `6e87b41a28df` | restack PR #100 on latest PR #99 runtime-plugin source-lock head | package metrics stable; first remote run slower from cache miss/builds |
+| `pr100-macos-max-jobs-2-2026-06-06` | `6e87b41a28df` | `debf0c1ce94c` | test hosted macOS Nix concurrency after npm shrinkwrap removes source gateway build | accepted; warm run fast, but speedup is cache-influenced |
 
 ## Runs
 
@@ -509,6 +544,120 @@ Remote proof:
     unpacked, 937 unique copied paths, 29 built derivations, eval CPU 15s.
   - Darwin aggregate: 85s, 227 paths fetched, 286 MiB download, 1.8 GiB
     unpacked, 231 unique copied paths, 0 built derivations, eval CPU 14s.
+
+### `pr100-on99-latest-restack-2026-06-06`
+
+- PR: `#100`
+- Measured commit: `6e87b41a28dfc40658bc59293201963a2792c5cd`
+- Previous PR #100 head: `c318250607171c4bc460c0b98c2dc10d9e32f1dd`
+- Latest PR #99 head used as stack base:
+  `b0c24bdb778eab0a18d9ac5e95cbd76b052a1e77`
+- Purpose:
+  - rebase PR #100 onto latest PR #99;
+  - keep PR #99's locked runtime plugin source/spec interface;
+  - keep PR #100's generated ACPX reuse, optional OpenClaw peer linking, and
+    shrinkwrap package pruning.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Gateway closure | prior optimized graph `557df7b4`/`f785b9d3` equivalent | 904,983,184 B | `6e87b41a` gateway path `/nix/store/6q5fc2xg5ialr6a6ax1b3vf6162k4qv9-openclaw-gateway-2026.6.1` | 904,983,184 B | unchanged | `nix path-info -S "$gateway"` |
+| `openclaw` closure | prior optimized graph `557df7b4`/`f785b9d3` equivalent | 1,846,536,320 B | `6e87b41a` path `/nix/store/ndybc97fhchy2mxw1mplgk8brqmfcc2v-openclaw-2026.6.1` | 1,846,536,320 B | unchanged | `nix path-info -S "$openclaw"` |
+| ACPX runtime plugin closure | prior optimized graph `f785b9d3` | 1,332,793,752 B | `6e87b41a` path `/nix/store/lc3mqmq4kj2vclkc20c0c7v13xzw7da5-openclaw-runtime-plugin-acpx-2026.6.1` | 1,332,793,752 B | unchanged | `nix path-info -S "$acpx"` |
+| Package manifests | prior optimized graph `f785b9d3` | 584 | `6e87b41a` gateway path | 584 | unchanged | `find "$gateway/lib/openclaw" -name package.json \| wc -l` |
+| Files under `lib/openclaw` | prior optimized graph `f785b9d3` | 34,054 | `6e87b41a` gateway path | 34,054 | unchanged | `find "$gateway/lib/openclaw" -type f \| wc -l` |
+| Darwin `ci` direct derivation inputs | `e93b21ed` split gate before latest PR #99 source-lock checks | 13 | `6e87b41a` `ci` drv | 14 | +1 source-lock/apply input | `nix derivation show "$(nix eval --raw .#checks.aarch64-darwin.ci.drvPath)" \| jq '.derivations[] \| .inputs.drvs \| keys \| length'` |
+| Linux `ci` direct derivation inputs | `e93b21ed` split gate | 14 | `6e87b41a` `ci` drv | 14 | unchanged | same for `checks.x86_64-linux.ci` |
+| Direct runtime plugin package inputs in `ci` | `e93b21ed` split gate | 0 | `6e87b41a` Darwin/Linux `ci` drvs | 0 | unchanged | `nix derivation show "$drv" \| jq -r '.derivations[] \| .inputs.drvs \| keys[]' \| rg 'openclaw-runtime-plugin-' \| rg -v 'openclaw-runtime-plugin-locks' \| wc -l` |
+| Runtime plugin lock check in `ci` | `e93b21ed` split gate | 1 | `6e87b41a` Darwin/Linux `ci` drvs | 1 | retained | same |
+| Local Darwin aggregate | rebased store paths cold locally | n/a | `6e87b41a` | 121s, 24 planned builds, 22 unique built drvs, eval CPU 8.52s | recorded | `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci --accept-flake-config --no-link .#checks.aarch64-darwin.ci` |
+| Local Linux aggregate via remote builder | rebased store paths cold locally | n/a | `6e87b41a` | 208s, 31 planned builds, 31 unique built drvs, eval CPU 8.26s | recorded | `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-linux-ci --accept-flake-config --no-link .#checks.x86_64-linux.ci` |
+| Explicit Darwin runtime plugin catalog proof | latest PR #99 stack plus PR #100 packager resolution | n/a | `6e87b41a` | 165.76s, 32 planned plugin derivations | recorded | `nix build --accept-flake-config --no-link .#checks.aarch64-darwin.runtime-plugin-packages` |
+| Remote PR run wall time | `27047925150` at `c318250` | 194s | `27048540708` at `6e87b41a` | 292s | 50.5% slower, cache miss | `gh run view <run> --json createdAt,updatedAt` |
+| Remote Linux job duration | `27047925150` | 118s | `27048540708` | 166s | 40.7% slower, cache miss | `gh run view <run> --json jobs` |
+| Remote macOS job duration | `27047925150` | 192s | `27048540708` | 288s | 50.0% slower, cache miss | same |
+| Remote Linux aggregate | `27047925150` | 108s, 932 fetched paths, 1.2 GiB download, 29 built drvs | `27048540708` | 157s, 941 fetched paths, 2.1 GiB download, 32 built drvs | slower first-run graph/cache | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Darwin aggregate | `27047925150` | 111s, 227 fetched paths, 286 MiB download, 0 built drvs | `27048540708` | 211s, 275 fetched paths, 1.4 GiB download, 24 built drvs | slower first-run graph/cache | same |
+
+Interpretation:
+
+- The rebase preserved the optimized package graph: gateway, `openclaw`, ACPX,
+  manifest count, and file count are unchanged from the prior optimized graph.
+- The first remote run on the new stack was slower because the new PR #99 base
+  changed store paths and GitHub built proof derivations before the external
+  cache had caught up. This is not a permanent graph regression by itself.
+- The default `ci` gate still avoids exhaustive runtime plugin package fan-out.
+  Runtime plugin catalog packaging remains explicit and was locally proven.
+
+Local proof for measured commit:
+
+- `node --check nix/scripts/openclaw-runtime-plugin-install.mjs`
+- `node --check nix/scripts/update-openclaw-runtime-plugin-locks.mjs`
+- `node --check scripts/summarize-nix-build-log.mjs`
+- `bash -n scripts/ci-nix-build.sh scripts/hm-activation-macos.sh scripts/update-pins.sh nix/scripts/check-package-contents.sh nix/scripts/openclaw-gateway-npm-install.sh`
+- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path) }' .github/workflows/ci.yml .github/workflows/pin-stable-openclaw-version.yml garnix.yaml`
+- `nix eval --accept-flake-config --json .#checks.aarch64-darwin --apply 'attrs: builtins.attrNames attrs'`
+- `nix eval --accept-flake-config --json .#checks.x86_64-linux --apply 'attrs: builtins.attrNames attrs'`
+- `nix build --accept-flake-config --no-link .#packages.aarch64-darwin.openclaw-runtime-plugin-acpx`
+- `nix build --accept-flake-config --no-link .#openclaw-gateway`
+- `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci --accept-flake-config --no-link .#checks.aarch64-darwin.ci`
+- `nix build --accept-flake-config --no-link .#checks.aarch64-darwin.runtime-plugin-locks`
+- `nix build --accept-flake-config --no-link .#checks.aarch64-darwin.runtime-plugin-packages`
+- `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-linux-ci --accept-flake-config --no-link .#checks.x86_64-linux.ci`
+- `git diff --check`
+
+Remote proof:
+
+- `27048540708`, success, `pull_request`,
+  `2026-06-06T01:18:53Z` to `2026-06-06T01:23:45Z`.
+- PR checks at `6e87b41a28dfc40658bc59293201963a2792c5cd`: GitHub
+  Actions Linux/macOS pass; Garnix flake evaluation, Darwin `ci`, and selected
+  package targets pass; Socket checks pass.
+
+### `pr100-macos-max-jobs-2-2026-06-06`
+
+- PR: `#100`
+- Measured commit: `debf0c1ce94c06585c059e5a0cf5af38127ec6d3`
+- Base commit: `6e87b41a28dfc40658bc59293201963a2792c5cd`
+- Purpose:
+  - raise hosted macOS Nix build concurrency from `max-jobs 1` to `max-jobs 2`;
+  - keep the same Darwin `ci` aggregate and Home Manager activation proof;
+  - apply the same setting to stable-pin macOS validation.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| macOS workflow `max-jobs` | `6e87b41a` workflows | 1 | `debf0c1c` workflows | 2 | raised | `rg 'max-jobs' .github/workflows/*.yml` |
+| Remote PR run wall time | `27048540708` at `6e87b41a` | 292s | `27048722860` at `debf0c1c` | 184s | 37.0% faster, cache-influenced | `gh run view <run> --json createdAt,updatedAt` |
+| Remote macOS job duration | `27048540708` | 288s | `27048722860` | 180s | 37.5% faster, cache-influenced | `gh run view <run> --json jobs` |
+| Remote macOS Darwin aggregate | `27048540708` | 211s, 275 fetched paths, 1.4 GiB download, 24 built drvs | `27048722860` | 111s, 227 fetched paths, 286 MiB download, 0 built drvs | 47.4% faster, cache-influenced | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Warm-run Darwin aggregate comparison | `27047925150` at `c318250`, `max-jobs 1` | 111s, 0 built drvs | `27048722860`, `max-jobs 2` | 111s, 0 built drvs | no isolated warm-cache speedup | same |
+| Remote Linux job duration | `27048540708` | 166s | `27048722860` | 133s | 19.9% faster, cache-influenced control | `gh run view <run> --json jobs` |
+| Remote Linux aggregate | `27048540708` | 157s, 941 fetched paths, 2.1 GiB download, 32 built drvs | `27048722860` | 125s, 932 fetched paths, 1.2 GiB download, 29 built drvs | 20.4% faster, cache-influenced control | parser command above |
+| Local cached Darwin aggregate with `max-jobs 2` | after local proof warmed paths | n/a | `debf0c1c` dirty worktree | 10s, 0 built drvs, eval CPU 7.78s | recorded | `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci-max-jobs-2 --accept-flake-config --option max-jobs 2 --no-link .#checks.aarch64-darwin.ci` |
+
+Interpretation:
+
+- Keep `max-jobs 2`: hosted macOS accepted it and the proof contract is
+  unchanged.
+- Do not claim the full remote speedup as an isolated concurrency win. The
+  measured run was cache-warm and built zero Darwin derivations; it mainly
+  proves that the less-serialized setting no longer trips the hosted runner.
+- If future package-affecting runs build locally on macOS, this setting should
+  reduce cold-build wall time relative to `max-jobs 1`, but that remains a
+  hypothesis until a comparable cold remote run builds the same derivations.
+
+Local proof for measured commit:
+
+- Workflow YAML parse for CI, stable-pin, and Garnix config.
+- `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci-max-jobs-2 --accept-flake-config --option max-jobs 2 --no-link .#checks.aarch64-darwin.ci`
+- `git diff --check`
+
+Remote proof:
+
+- `27048722860`, success, `pull_request`,
+  `2026-06-06T01:26:37Z` to `2026-06-06T01:29:41Z`.
+- PR checks at `debf0c1ce94c06585c059e5a0cf5af38127ec6d3`: GitHub
+  Actions Linux/macOS pass; Garnix flake evaluation, Darwin `ci`, and selected
+  package targets pass; Socket checks pass.
 
 ## Add A Run
 
