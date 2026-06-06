@@ -107,6 +107,7 @@ nixpkgs `16c7794d0a28b5a37904d55bcca36003b9109aaa`.
 | `pr100-hm-manuals-off-2026-06-06` | `4cb703b54f44` | `2896ac3847e0` | disable Home Manager manual outputs in activation proof fixtures | fewer doc/options paths; `options.json` warning removed; apply proof retained |
 | `pr100-launchd-bootstrap-no-kickstart-2026-06-06` | `f2c24335809b` | `f6446c383e4` | avoid duplicate launchd kickstart immediately after successful relink/bootstrap | macOS activation step faster; launchd/gateway proof retained |
 | `pr100-custom-substituter-meter-2026-06-06` | `d711fa683e7` | `919261d88be` | list copied path names for non-default substituters | Garnix dependence visible per run without changing proof graph |
+| `pr100-internal-json-build-count-2026-06-06` | `5f218197770f` | `233acba0a508` | count Nix internal-json Build activities as built derivations | no graph change; structured probes no longer report false zero built drvs |
 
 ## Runs
 
@@ -1239,6 +1240,48 @@ Remote proof for measured commit:
   macOS, Garnix, Socket Security, and flake evaluation checks passed.
 - Remote summary includes `Copied from https://cache.garnix.io:` lines for the
   Linux and macOS aggregate steps.
+
+### `pr100-internal-json-build-count-2026-06-06`
+
+- PR: `#100`
+- Base commit: `5f218197770ff3e1a1d52eb35c2a1521dd8ed420`
+- Measured code commit: `233acba0a508b4ce7d03ef2f4c134784c74512b5`
+- Purpose:
+  - check the current Nix build-analysis tooling landscape against the repo's
+    meter;
+  - make optional `--log-format internal-json` probes count actual Build
+    activities as built derivations;
+  - keep default CI graph and human log parsing unchanged.
+- Anti-regression review:
+  - The change only affects `scripts/summarize-nix-build-log.mjs`.
+  - It reads drv paths already present in Nix internal-json Build activity
+    fields.
+  - It does not change Nix build arguments, check selection, package outputs,
+    cache/substituter configuration, launchd/systemd/apply proof, or default
+    CI log format.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Internal-json built drv count | parser at `5f218197` over local probe log | 0 unique / 0 lines | parser at `233acba0` over same probe log | 1 unique / 1 lines | false zero fixed | `scripts/summarize-nix-build-log.mjs --label local-internal-json-fast-probe /tmp/nix-openclaw-ci-meter/local-internal-json-fast-probe.nix.log` |
+| Internal-json build phase hint | parser at `5f218197` over local probe log | absent | parser at `233acba0` over same probe log | `build +2.00..+10` | added | same |
+| Latest remote plain-log replay | `5f218197` parser intent | current counts | `233acba0` parser over `27053188841` | same counts: Linux 29 built drvs, macOS aggregate 0, HM 1 | unchanged | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-27053188841.log` |
+
+Interpretation:
+
+- The useful current SOTA remains native Nix structured events and cache-status
+  probes, not a new heavyweight CI service.
+- This commit improves the optional structured drill-down path so future
+  internal-json experiments can answer "what built, and how long did that span"
+  without losing built-derivation counts.
+- This is observability only. It should not be counted as a CI speedup.
+
+Local proof for measured commit:
+
+- `RUNNER_TEMP=/tmp NIX_METER_BUILD_CLOSURE=0 scripts/ci-nix-build.sh local-internal-json-fast-probe --accept-flake-config --log-format internal-json --rebuild --no-link .#checks.aarch64-darwin.config-validity`
+- `node --check scripts/summarize-nix-build-log.mjs`
+- `scripts/summarize-nix-build-log.mjs --label local-internal-json-fast-probe /tmp/nix-openclaw-ci-meter/local-internal-json-fast-probe.nix.log`
+- `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-27053188841.log`
+- `git diff --check`
 
 ## Add A Run
 
