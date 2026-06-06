@@ -109,6 +109,7 @@ nixpkgs `16c7794d0a28b5a37904d55bcca36003b9109aaa`.
 | `pr100-custom-substituter-meter-2026-06-06` | `d711fa683e7` | `919261d88be` | list copied path names for non-default substituters | Garnix dependence visible per run without changing proof graph |
 | `pr100-internal-json-build-count-2026-06-06` | `5f218197770f` | `233acba0a508` | count Nix internal-json Build activities as built derivations | no graph change; structured probes no longer report false zero built drvs |
 | `pr100-runtime-plugin-smoke-split-2026-06-06` | `148be063849b` | `196d6377fa13` | split runtime plugin smokes out of the default CI gate | default CI no longer depends on Slack/diagnostics plugin packages; explicit plugin smokes retained |
+| `pr100-single-nix-installer-action-2026-06-06` | `bde5f61d5508` | `7295cda03e52` | use `cachix/install-nix-action` for macOS workflows too | macOS job faster; workflow still Linux-bound |
 
 ## Runs
 
@@ -1360,6 +1361,69 @@ Remote proof for measured commit:
   - macOS HM activation step: `10s -> 6.19s`; graph unchanged, also
     variance/cached-state influenced.
 - `rg -n 'openclaw-runtime-plugin-(slack|diagnostics-prometheus)|slack-2026\.6\.1\.tgz|diagnostics-prometheus-2026\.6\.1\.tgz' /tmp/nix-openclaw-ci-logs/run-27053787114.log`
+  returned no matches.
+
+### `pr100-single-nix-installer-action-2026-06-06`
+
+- PR: `#100`
+- Base commit: `bde5f61d5508323419823b28e8b290e49f6be589`
+- Measured code commit: `7295cda03e52429b220fd8b0a099d682ddc51c34`
+- Purpose:
+  - test whether macOS GitHub setup time can improve without changing any Nix
+    package/check target;
+  - reduce workflow action surface by using the same Nix installer action on
+    Linux and macOS;
+  - remove Determinate-specific CI setup/cache dependence from PR #100.
+- Tooling source checked:
+  - `cachix/install-nix-action` supports Linux and macOS and advertises quick
+    installation, about 4s on Linux and 20s on macOS:
+    https://github.com/cachix/install-nix-action
+- Anti-regression review:
+  - The change only touches workflow installer actions.
+  - The Linux and macOS installables are unchanged:
+    `.checks.x86_64-linux.ci`, `.checks.aarch64-darwin.ci`, and
+    `scripts/hm-activation-macos.sh`.
+  - Default install/config/apply proof remains in GitHub Actions.
+  - Pin validation and promotion now use the same installer action as CI.
+  - The accepted win is macOS job/setup speed and simpler workflow surface; do
+    not count this as a package graph improvement.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Workflow Nix installer action kinds | `bde5f61d` workflows | 2 | `7295cda0` workflows | 1 | one fewer action surface | `rg -n 'DeterminateSystems/nix-installer-action\|cachix/install-nix-action' .github/workflows` |
+| Determinate installer action refs | `bde5f61d` workflows | 3 | `7295cda0` workflows | 0 | removed | same |
+| Cachix installer action refs | `bde5f61d` workflows | 2 | `7295cda0` workflows | 5 | unified | same |
+| Remote macOS job duration | `27053870592` at `bde5f61d` | 130s | `27054045704` at `7295cda0` | 108s | 16.9% faster | `gh run view <run> --json jobs` |
+| Remote macOS Install Nix step | `27053870592` | 33s | `27054045704` | 27s | 18.2% faster | same |
+| Remote macOS aggregate step | `27053870592` | 79s | `27054045704` | 65s | 17.7% faster | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote macOS aggregate copied paths | `27053870592` | 229 | `27054045704` | 229 | unchanged | same |
+| Remote macOS aggregate built derivations | `27053870592` | 0 | `27054045704` | 0 | unchanged | same |
+| Remote macOS aggregate download | `27053870592` | 286 MiB | `27054045704` | 328 MiB | 14.7% more | same |
+| Remote macOS custom copy sources | `27053870592` | `cache.nixos.org` 138, `install.determinate.systems` 59, Garnix 32 | `27054045704` | `cache.nixos.org` 197, Garnix 32 | Determinate substituter removed | same |
+| Remote Linux job duration | `27053870592` | 125s | `27054045704` | 134s | 7.2% slower, runner variance | `gh run view <run> --json jobs` |
+| Remote workflow wall time | `27053870592` | 133s | `27054045704` | 137s | 3.0% slower, Linux-bound variance | `gh run view <run> --json createdAt,updatedAt` |
+
+Interpretation:
+
+- Keep the installer unification: it makes macOS CI faster and removes an
+  installer/cache surface without changing proof targets.
+- Overall PR wall time did not improve because Linux remains the long pole.
+- Removing Determinate's substituter did not force macOS aggregate builds in the
+  measured run; its 59 copied paths moved to `cache.nixos.org`.
+
+Local proof for measured commit:
+
+- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path) }; puts "yaml ok"' .github/workflows/ci.yml .github/workflows/pin-stable-openclaw-version.yml garnix.yaml`
+- `git diff --check`
+
+Remote proof for measured commit:
+
+- `27054045704`, success, `pull_request`,
+  `2026-06-06T05:41:20Z` to `2026-06-06T05:43:37Z`.
+- macOS job passed in `1m48s`; Linux job passed in `2m14s`.
+- `rg -n 'install\.determinate\.systems|DeterminateSystems/nix-installer-action|copying path .*install\.determinate' /tmp/nix-openclaw-ci-logs/run-27054045704.log`
+  returned no matches.
+- `rg -n 'openclaw-runtime-plugin-(slack|diagnostics-prometheus)|slack-2026\.6\.1\.tgz|diagnostics-prometheus-2026\.6\.1\.tgz' /tmp/nix-openclaw-ci-logs/run-27054045704.log`
   returned no matches.
 
 ## Add A Run
