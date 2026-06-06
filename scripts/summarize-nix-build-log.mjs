@@ -94,6 +94,15 @@ function emptyGroup(label) {
       lists: null,
       symbols: null,
     },
+    internalJson: {
+      events: 0,
+      starts: 0,
+      stops: 0,
+      results: 0,
+      active: new Map(),
+      completed: [],
+      startTypes: new Map(),
+    },
   };
 }
 
@@ -104,10 +113,16 @@ function recordLine(group, rawLine) {
     group.lastTimestamp = timestamp;
   }
 
-  const line = stripNixJsonPrefix(message);
-  recordEvalStats(group, line);
+  const nixEvent = parseNixJsonEvent(message);
+  if (nixEvent) {
+    recordNixJsonEvent(group, timestamp, nixEvent);
+  }
 
-  const fetchPlan = line.match(
+  const line = nixEvent ? nixEventText(nixEvent, message) : message;
+  const plainLine = stripAnsi(line);
+  recordEvalStats(group, plainLine);
+
+  const fetchPlan = plainLine.match(
     /these ([0-9]+) paths will be fetched \(([^,]+) download, ([^)]+) unpacked\)/,
   );
   if (fetchPlan) {
@@ -118,19 +133,19 @@ function recordLine(group, rawLine) {
     group.fetchUnpackedBytes += parseSize(fetchPlan[3]);
   }
 
-  if (/^this derivation will be built:/.test(line)) {
+  if (/^this derivation will be built:/.test(plainLine)) {
     markSignal(group, timestamp);
     group.firstBuildPlanTimestamp ||= timestamp;
     group.buildPlanCount += 1;
   }
-  const buildPlan = line.match(/^these ([0-9]+) derivations will be built:/);
+  const buildPlan = plainLine.match(/^these ([0-9]+) derivations will be built:/);
   if (buildPlan) {
     markSignal(group, timestamp);
     group.firstBuildPlanTimestamp ||= timestamp;
     group.buildPlanCount += Number(buildPlan[1]);
   }
 
-  const copied = line.match(/copying path '([^']+)' from '([^']+)'/);
+  const copied = plainLine.match(/copying path '([^']+)' from '([^']+)'/);
   if (copied) {
     markSignal(group, timestamp);
     group.firstCopyTimestamp ||= timestamp;
@@ -140,7 +155,7 @@ function recordLine(group, rawLine) {
     group.copySources.set(copied[2], (group.copySources.get(copied[2]) || 0) + 1);
   }
 
-  const built = line.match(/building '([^']+\.drv)'/);
+  const built = plainLine.match(/building '([^']+\.drv)'/);
   if (built) {
     markSignal(group, timestamp);
     group.firstBuildTimestamp ||= timestamp;
@@ -151,16 +166,106 @@ function recordLine(group, rawLine) {
     group.builtNames.set(name, (group.builtNames.get(name) || 0) + 1);
   }
 
-  if (/unpacking ['"][^'"]+['"] into the Git cache/.test(line)) {
+  if (/unpacking ['"][^'"]+['"] into the Git cache/.test(plainLine)) {
     markSignal(group, timestamp);
     group.firstInputFetchTimestamp ||= timestamp;
     group.unpackedInputs += 1;
   }
 
-  if (/\bwarning:/.test(line)) {
+  if (/\bwarning:/.test(plainLine)) {
     markSignal(group, timestamp);
     group.warningCount += 1;
   }
+}
+
+function stripAnsi(value) {
+  return value.replace(/\x1B\[[0-9;]*m/g, "");
+}
+
+function parseNixJsonEvent(line) {
+  if (!line.startsWith("@nix ")) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(line.slice(5));
+  } catch {
+    return null;
+  }
+}
+
+function nixEventText(event, fallback) {
+  return event.text || event.msg || fallback;
+}
+
+function recordNixJsonEvent(group, timestamp, event) {
+  group.internalJson.events += 1;
+
+  if (event.action === "start") {
+    group.internalJson.starts += 1;
+    const type = nixActivityTypeName(event.type);
+    group.internalJson.startTypes.set(
+      type,
+      (group.internalJson.startTypes.get(type) || 0) + 1,
+    );
+    group.internalJson.active.set(event.id, {
+      id: event.id,
+      type,
+      text: event.text || type,
+      fields: Array.isArray(event.fields) ? event.fields : [],
+      startedAt: timestamp,
+      lastPhase: null,
+    });
+    return;
+  }
+
+  if (event.action === "stop") {
+    group.internalJson.stops += 1;
+    const active = group.internalJson.active.get(event.id);
+    if (active) {
+      active.stoppedAt = timestamp;
+      active.durationSeconds = durationSeconds(active.startedAt, timestamp);
+      group.internalJson.completed.push(active);
+      group.internalJson.active.delete(event.id);
+    }
+    return;
+  }
+
+  if (event.action === "result") {
+    group.internalJson.results += 1;
+    const active = group.internalJson.active.get(event.id);
+    if (active && event.type === 104 && Array.isArray(event.fields)) {
+      active.lastPhase = String(event.fields[0] || "");
+    }
+  }
+}
+
+function nixActivityTypeName(type) {
+  const names = {
+    0: "Unknown",
+    100: "CopyPath",
+    101: "FileTransfer",
+    102: "Realise",
+    103: "CopyPaths",
+    104: "Builds",
+    105: "Build",
+    106: "OptimiseStore",
+    107: "VerifyPaths",
+    108: "Substitute",
+    109: "QueryPathInfo",
+    110: "PostBuildHook",
+    111: "BuildWaiting",
+    112: "FetchTree",
+  };
+  return names[type] || `Activity${type}`;
+}
+
+function durationSeconds(start, end) {
+  if (!start || !end) {
+    return null;
+  }
+  const seconds = (Date.parse(end) - Date.parse(start)) / 1000;
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : null;
 }
 
 function markSignal(group, timestamp) {
@@ -236,19 +341,6 @@ function splitTimestamp(line) {
   return { timestamp: match[1], message: match[2] };
 }
 
-function stripNixJsonPrefix(line) {
-  if (!line.startsWith("@nix ")) {
-    return line;
-  }
-
-  try {
-    const event = JSON.parse(line.slice(5));
-    return event.text || event.msg || line;
-  } catch {
-    return line;
-  }
-}
-
 function parseSize(value) {
   const match = value.trim().match(/^([0-9]+(?:\.[0-9]+)?)\s*([KMGT]i?B|B)$/i);
   if (!match) {
@@ -309,7 +401,8 @@ function hasSignal(group) {
     group.copiedPathLines > 0 ||
     group.builtDrvLines > 0 ||
     group.unpackedInputs > 0 ||
-    group.warningCount > 0
+    group.warningCount > 0 ||
+    group.internalJson.events > 0
   );
 }
 
@@ -349,7 +442,8 @@ function render(groups, title) {
       group.builtNames.size > 0 ||
       group.copySources.size > 0 ||
       hasPhaseHints(group) ||
-      hasEvalStats(group),
+      hasEvalStats(group) ||
+      hasNixJsonActivity(group),
   );
   for (const group of details) {
     lines.push("", `#### ${group.label}`, "");
@@ -358,6 +452,9 @@ function render(groups, title) {
     }
     if (hasEvalStats(group)) {
       lines.push(`Eval stats: ${formatEvalStats(group.evalStats)}`);
+    }
+    if (hasNixJsonActivity(group)) {
+      lines.push(`Structured Nix events: ${formatNixJsonActivity(group)}`);
     }
     if (group.copySources.size > 0) {
       lines.push(`Copy sources: ${formatTopMap(group.copySources, 4)}`);
@@ -496,6 +593,52 @@ function formatEvalStats(stats) {
 
 function formatCount(value) {
   return new Intl.NumberFormat("en-US").format(value);
+}
+
+function hasNixJsonActivity(group) {
+  return group.internalJson.events > 0;
+}
+
+function formatNixJsonActivity(group) {
+  const parts = [
+    `${formatCount(group.internalJson.events)} events`,
+    `${formatCount(group.internalJson.starts)} starts`,
+    `${formatCount(group.internalJson.stops)} stops`,
+    `${formatCount(group.internalJson.results)} results`,
+  ];
+  if (group.internalJson.startTypes.size > 0) {
+    parts.push(`start types ${formatTopMap(group.internalJson.startTypes, 6)}`);
+  }
+
+  const timed = group.internalJson.completed
+    .filter((activity) => activity.durationSeconds !== null)
+    .sort((left, right) => {
+      return right.durationSeconds - left.durationSeconds || left.text.localeCompare(right.text);
+    })
+    .slice(0, 6);
+  if (timed.length > 0) {
+    parts.push(`top spans ${timed.map(formatNixJsonSpan).join("; ")}`);
+  } else if (group.internalJson.completed.length > 0) {
+    parts.push("top spans unavailable without timestamped internal-json lines");
+  }
+
+  return parts.join(", ");
+}
+
+function formatNixJsonSpan(activity) {
+  const phase = activity.lastPhase ? `, last phase ${activity.lastPhase}` : "";
+  const label =
+    activity.text === activity.type
+      ? activity.type
+      : `${activity.type} ${shorten(activity.text, 110)}`;
+  return `${label} (${formatSeconds(activity.durationSeconds)}s${phase})`;
+}
+
+function shorten(value, limit) {
+  if (value.length <= limit) {
+    return value;
+  }
+  return `${value.slice(0, limit - 3)}...`;
 }
 
 try {
