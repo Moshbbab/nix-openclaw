@@ -8,6 +8,19 @@ This changelog starts with the current pre-1.0 nix-openclaw Home Manager module
 API transition.
 Older repository history is available in git.
 
+## 2026-06-06
+
+### Added
+
+- Added `programs.openclaw.runtimePluginSources` for locked,
+  Nix-reproducible npm and ClawHub runtime plugin artifacts. Generated
+  supported ids still use `programs.openclaw.runtimePlugins`.
+- Added shrinkwrap materialization for runtime plugins with npm dependencies.
+  Shrinkwrapped packages use `npmDepsHash`; plugins that bundle `node_modules`
+  remain supported.
+- Added `runtimePlugins` support for `acpx`, `codex`, `copilot`, `matrix`,
+  `memory-lancedb`, `tlon`, and `whatsapp`.
+
 ## 2026-06-05
 
 ### Highlights

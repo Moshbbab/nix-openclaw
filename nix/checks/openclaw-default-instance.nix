@@ -2,6 +2,7 @@
   lib,
   pkgs,
   stdenv,
+  nodejs_22,
 }:
 
 let
@@ -522,9 +523,7 @@ let
       { source = runtimePluginRootSource; }
     ];
   };
-  customRuntimePluginRootCheck =
-    requireEvalFailure "customPlugins rejects OpenClaw runtime plugin roots"
-      customRuntimePluginRootEval.config.home.file;
+  customRuntimePluginRootCheck = requireEvalFailure "customPlugins rejects OpenClaw runtime plugin roots" customRuntimePluginRootEval.config.home.file;
 
   runtimePluginEval = moduleEval {
     runtimePlugins = [ "slack" ];
@@ -589,10 +588,12 @@ let
   );
   runtimePluginCatalogGeneratedLoadPaths =
     ((runtimePluginCatalogGeneratedConfig.plugins or { }).load or { }).paths or [ ];
-  runtimePluginCatalogGeneratedEntries =
-    ((runtimePluginCatalogGeneratedConfig.plugins or { }).entries or { });
+  runtimePluginCatalogGeneratedEntries = (
+    (runtimePluginCatalogGeneratedConfig.plugins or { }).entries or { }
+  );
   runtimePluginCatalogGeneratedCheck =
-    builtins.deepSeq (requireNoAssertionFailures "runtimePlugins generated catalog ids" runtimePluginCatalogGeneratedEval)
+    builtins.deepSeq
+      (requireNoAssertionFailures "runtimePlugins generated catalog ids" runtimePluginCatalogGeneratedEval)
       (
         if
           !(lib.any (
@@ -662,15 +663,16 @@ let
     ];
   };
   runtimePluginDuplicateCheck =
-    requireAssertionFailure "duplicate runtimePlugins" "runtimePlugins contains duplicate ids: slack"
+    requireAssertionFailure "duplicate runtimePlugins"
+      "runtimePlugins/runtimePluginSources contains duplicate ids: slack"
       runtimePluginDuplicateEval;
 
   runtimePluginUnsupportedEval = moduleEval {
-    runtimePlugins = [ "codex" ];
+    runtimePlugins = [ "not-a-real-openclaw-plugin" ];
   };
   runtimePluginUnsupportedCheck =
     requireAssertionFailure "unsupported runtimePlugins"
-      "Maintainers can inspect skipped-catalog diagnostics in nix/generated/openclaw-runtime-plugins/report.json"
+      "Maintainers can inspect unsupported-plugin diagnostics in nix/generated/openclaw-runtime-plugins/report.json"
       runtimePluginUnsupportedEval;
 
   runtimePluginRawLoadPathEval = moduleEval {
@@ -679,7 +681,7 @@ let
   };
   runtimePluginRawLoadPathCheck =
     requireAssertionFailure "runtimePlugins raw load path"
-      "runtimePlugins cannot be mixed with raw programs.openclaw.config.plugins.load.paths"
+      "runtimePlugins/runtimePluginSources cannot be mixed with raw programs.openclaw.config.plugins.load.paths"
       runtimePluginRawLoadPathEval;
 
   runtimePluginInstallRecordEval = moduleEval {
@@ -690,9 +692,7 @@ let
       installPath = "/tmp/mutable-openclaw-slack";
     };
   };
-  runtimePluginInstallRecordCheck =
-    requireEvalFailure "runtimePlugins install records are schema-rejected"
-      runtimePluginInstallRecordEval.config.assertions;
+  runtimePluginInstallRecordCheck = requireEvalFailure "runtimePlugins install records are schema-rejected" runtimePluginInstallRecordEval.config.assertions;
 
   runtimePluginDisabledEval = moduleEval {
     runtimePlugins = [ "slack" ];
@@ -700,7 +700,7 @@ let
   };
   runtimePluginDisabledCheck =
     requireAssertionFailure "runtimePlugins disabled entry"
-      "runtimePlugins selected ids disabled in config.plugins.entries: slack"
+      "runtimePlugins/runtimePluginSources selected ids disabled in config.plugins.entries: slack"
       runtimePluginDisabledEval;
 
   runtimePluginDeniedEval = moduleEval {
@@ -709,8 +709,116 @@ let
   };
   runtimePluginDeniedCheck =
     requireAssertionFailure "runtimePlugins denied entry"
-      "runtimePlugins selected ids denied in config.plugins.deny: slack"
+      "runtimePlugins/runtimePluginSources selected ids denied in config.plugins.deny: slack"
       runtimePluginDeniedEval;
+
+  runtimePluginSourceEval = moduleEval {
+    runtimePluginSources = [
+      {
+        id = "diagnostics-prometheus";
+        spec = "npm:@openclaw/diagnostics-prometheus@2026.6.1";
+        hash = "sha256-nXDuWe72bgnuinoZFZDPwKowYml/5lturHD+sKti4AA=";
+      }
+    ];
+    config.plugins.allow = [ "memory-core" ];
+  };
+  runtimePluginSourceConfig = builtins.fromJSON (
+    builtins.unsafeDiscardStringContext
+      runtimePluginSourceEval.config.home.file.".openclaw/openclaw.json".text
+  );
+  runtimePluginSourceLoadPaths =
+    ((runtimePluginSourceConfig.plugins or { }).load or { }).paths or [ ];
+  runtimePluginSourceEntry =
+    ((runtimePluginSourceConfig.plugins or { }).entries or { }).diagnostics-prometheus or { };
+  runtimePluginSourceAllow = ((runtimePluginSourceConfig.plugins or { }).allow or [ ]);
+  runtimePluginSourceCheck =
+    builtins.deepSeq
+      (requireNoAssertionFailures "runtimePluginSources npm source" runtimePluginSourceEval)
+      (
+        if
+          !(lib.any (
+            path: lib.hasInfix "openclaw-runtime-plugin-diagnostics-prometheus" path
+          ) runtimePluginSourceLoadPaths)
+        then
+          throw "runtimePluginSources did not add the npm source plugin to plugins.load.paths."
+        else if (runtimePluginSourceEntry.enabled or false) != true then
+          throw "runtimePluginSources did not enable the source plugin entry."
+        else if
+          runtimePluginSourceAllow != [
+            "memory-core"
+            "diagnostics-prometheus"
+          ]
+        then
+          throw "runtimePluginSources did not merge source plugin id into an existing plugins.allow list."
+        else
+          "ok"
+      );
+
+  runtimePluginSourceDuplicateEval = moduleEval {
+    runtimePlugins = [ "diagnostics-prometheus" ];
+    runtimePluginSources = [
+      {
+        id = "diagnostics-prometheus";
+        spec = "npm:@openclaw/diagnostics-prometheus@2026.6.1";
+      }
+    ];
+  };
+  runtimePluginSourceDuplicateCheck =
+    requireAssertionFailure "duplicate runtimePluginSources"
+      "runtimePlugins/runtimePluginSources contains duplicate ids: diagnostics-prometheus"
+      runtimePluginSourceDuplicateEval;
+
+  runtimePluginSourceAmbiguousEval = moduleEval {
+    runtimePluginSources = [
+      {
+        id = "bad-source";
+      }
+    ];
+  };
+  runtimePluginSourceAmbiguousCheck =
+    requireAssertionFailure "runtimePluginSources ambiguous source"
+      "runtimePluginSources entries must set exactly one of spec or url"
+      runtimePluginSourceAmbiguousEval;
+
+  runtimePluginSourceInvalidSpecEval = moduleEval {
+    runtimePluginSources = [
+      {
+        id = "bad-source";
+        spec = "git:github.com/acme/openclaw-plugin@v1.0.0";
+      }
+    ];
+  };
+  runtimePluginSourceInvalidSpecCheck =
+    requireAssertionFailure "runtimePluginSources invalid spec"
+      "runtimePluginSources spec must start with npm: or clawhub:"
+      runtimePluginSourceInvalidSpecEval;
+
+  runtimePluginSourceInvalidUrlEval = moduleEval {
+    runtimePluginSources = [
+      {
+        id = "bad-url";
+        url = "http://example.invalid/plugin.tgz";
+      }
+    ];
+  };
+  runtimePluginSourceInvalidUrlCheck =
+    requireAssertionFailure "runtimePluginSources invalid url"
+      "runtimePluginSources url must start with https://: bad-url"
+      runtimePluginSourceInvalidUrlEval;
+
+  runtimePluginSourceRawLoadPathEval = moduleEval {
+    runtimePluginSources = [
+      {
+        id = "diagnostics-prometheus";
+        spec = "npm:@openclaw/diagnostics-prometheus@2026.6.1";
+      }
+    ];
+    config.plugins.load.paths = [ "/tmp/user-openclaw-runtime-plugin" ];
+  };
+  runtimePluginSourceRawLoadPathCheck =
+    requireAssertionFailure "runtimePluginSources raw load path"
+      "runtimePlugins/runtimePluginSources cannot be mixed with raw programs.openclaw.config.plugins.load.paths"
+      runtimePluginSourceRawLoadPathEval;
 
   npmRuntimePluginEval = moduleEval {
     customPlugins = [
@@ -753,6 +861,12 @@ let
     runtimePluginInstallRecordCheck
     runtimePluginDisabledCheck
     runtimePluginDeniedCheck
+    runtimePluginSourceCheck
+    runtimePluginSourceDuplicateCheck
+    runtimePluginSourceAmbiguousCheck
+    runtimePluginSourceInvalidSpecCheck
+    runtimePluginSourceInvalidUrlCheck
+    runtimePluginSourceRawLoadPathCheck
     npmRuntimePluginCheck
   ] "ok";
 
@@ -762,9 +876,9 @@ stdenv.mkDerivation {
   version = "1";
   dontUnpack = true;
   # Evaluation alone missed installPhase regressions in the QMD wrapper.
-  nativeBuildInputs = lib.optional (qmdMemoryPackage != null) qmdMemoryPackage;
+  nativeBuildInputs = [ nodejs_22 ] ++ lib.optional (qmdMemoryPackage != null) qmdMemoryPackage;
   env = {
     OPENCLAW_DEFAULT_INSTANCE = checkKey;
   };
-  installPhase = "${../scripts/empty-install.sh}";
+  installPhase = "node ${../scripts/check-openclaw-runtime-plugin-installer.mjs} ${../scripts/openclaw-runtime-plugin-install.mjs} && ${../scripts/empty-install.sh}";
 }

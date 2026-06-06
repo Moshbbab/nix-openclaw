@@ -11,7 +11,7 @@ let
     options = {
       source = lib.mkOption {
         type = lib.types.str;
-        description = "nix-openclaw plugin source. Use a plugin flake source (github:/path:). OpenClaw npm runtime plugins use programs.openclaw.runtimePlugins.";
+        description = "nix-openclaw plugin source. Use a plugin flake source (github:/path:). OpenClaw npm and ClawHub runtime plugins use programs.openclaw.runtimePlugins or runtimePluginSources.";
       };
       config = lib.mkOption {
         type = lib.types.attrs;
@@ -35,7 +35,43 @@ let
       };
     };
   };
-  instanceModule = import ./options-instance.nix { inherit lib openclawLib pluginOptionType; };
+  runtimePluginSourceType = lib.types.submodule {
+    options = {
+      id = lib.mkOption {
+        type = lib.types.str;
+        description = "OpenClaw plugin id from openclaw.plugin.json.";
+      };
+      spec = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        example = "npm:@scope/openclaw-plugin@1.2.3";
+        description = "Exact npm: or clawhub: plugin source spec. Use an exact version, not latest or a dist-tag.";
+      };
+      url = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Direct HTTPS npm-pack tarball URL. Use this only when npm: or clawhub: resolution is not the desired source.";
+      };
+      hash = lib.mkOption {
+        type = lib.types.str;
+        default = lib.fakeHash;
+        description = "Nix hash for the resolved plugin tarball. Start with lib.fakeHash and replace it with the hash Nix reports.";
+      };
+      npmDepsHash = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Nix npm dependency hash for shrinkwrapped plugins. Set to lib.fakeHash when the build asks for it, then replace it with the suggested hash.";
+      };
+    };
+  };
+  instanceModule = import ./options-instance.nix {
+    inherit
+      lib
+      openclawLib
+      pluginOptionType
+      runtimePluginSourceType
+      ;
+  };
   pluginCatalog = import ./plugin-catalog.nix;
   bootstrapFilesOptionType = lib.types.submodule {
     options = {
@@ -213,7 +249,20 @@ in
         "slack"
         "discord"
       ];
-      description = "Supported OpenClaw catalog runtime plugin ids to package immutably and load through OpenClaw's plugins.load.paths.";
+      description = "Supported OpenClaw runtime plugin ids to package immutably and load through OpenClaw's plugins.load.paths.";
+    };
+
+    runtimePluginSources = lib.mkOption {
+      type = lib.types.listOf runtimePluginSourceType;
+      default = [ ];
+      example = [
+        {
+          id = "my-plugin";
+          spec = "npm:@scope/openclaw-plugin@1.2.3";
+          hash = lib.fakeHash;
+        }
+      ];
+      description = "Locked OpenClaw runtime plugin sources to package immutably and load through OpenClaw's plugins.load.paths.";
     };
 
     bundledPlugins = lib.mapAttrs (name: plugin: {

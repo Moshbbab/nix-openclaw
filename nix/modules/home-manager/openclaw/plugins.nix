@@ -14,11 +14,11 @@ let
     let
       _ =
         if (plugin.id or null) != null then
-          throw "Plugin ${plugin.source}: id is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins"
+          throw "Plugin ${plugin.source}: id is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins or runtimePluginSources"
         else if (plugin.hash or lib.fakeHash) != lib.fakeHash then
-          throw "Plugin ${plugin.source}: hash is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins"
+          throw "Plugin ${plugin.source}: hash is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins or runtimePluginSources"
         else if (plugin.enabled or true) != true then
-          throw "Plugin ${plugin.source}: enabled is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins"
+          throw "Plugin ${plugin.source}: enabled is not valid for customPlugins; OpenClaw runtime plugins use programs.openclaw.runtimePlugins or runtimePluginSources"
         else
           null;
       system = pkgs.stdenv.hostPlatform.system;
@@ -39,26 +39,28 @@ let
       needs = resolvedPlugin.needs or { };
       _noRuntimePlugins =
         if resolvedPlugin ? plugins then
-          throw "openclawPlugin.plugins is not supported in ${plugin.source}; OpenClaw runtime plugins use programs.openclaw.runtimePlugins with supported catalog ids"
+          throw "openclawPlugin.plugins is not supported in ${plugin.source}; OpenClaw runtime plugins use programs.openclaw.runtimePlugins or runtimePluginSources"
         else
           null;
     in
-    builtins.seq _ (builtins.seq _noRuntimePlugins {
-      source = plugin.source;
-      inherit name;
-      skills = resolvedPlugin.skills or [ ];
-      packages = resolvedPlugin.packages or [ ];
-      needs = {
-        stateDirs = needs.stateDirs or [ ];
-        requiredEnv = needs.requiredEnv or [ ];
-      };
-      config = plugin.config or { };
-    });
+    builtins.seq _ (
+      builtins.seq _noRuntimePlugins {
+        source = plugin.source;
+        inherit name;
+        skills = resolvedPlugin.skills or [ ];
+        packages = resolvedPlugin.packages or [ ];
+        needs = {
+          stateDirs = needs.stateDirs or [ ];
+          requiredEnv = needs.requiredEnv or [ ];
+        };
+        config = plugin.config or { };
+      }
+    );
 
   resolvePlugin =
     plugin:
     if lib.hasPrefix "npm:" plugin.source then
-      throw "customPlugins.source = \"${plugin.source}\" is not supported for OpenClaw npm runtime plugins. Use programs.openclaw.runtimePlugins with a supported OpenClaw catalog id instead."
+      throw "customPlugins.source = \"${plugin.source}\" is not supported for OpenClaw npm runtime plugins. Use programs.openclaw.runtimePlugins for generated official ids or programs.openclaw.runtimePluginSources for locked npm/ClawHub sources instead."
     else
       resolveFlakePlugin plugin;
 
@@ -126,32 +128,31 @@ let
     in
     lib.flatten (map toPairs entries);
 
-  pluginAssertions =
-    lib.flatten (
-      lib.mapAttrsToList (
-        instName: inst:
-        let
-          plugins = resolvedPluginsByInstance.${instName} or [ ];
-          envFor = p: (p.config.env or { });
-          missingFor = p: lib.filter (req: !(builtins.hasAttr req (envFor p))) p.needs.requiredEnv;
-          configMissingStateDir = p: (p.config.settings or { }) != { } && (p.needs.stateDirs or [ ]) == [ ];
-          mkAssertion =
-            p:
-            let
-              missing = missingFor p;
-            in
-            {
-              assertion = missing == [ ];
-              message = "programs.openclaw.instances.${instName}: plugin ${p.name} missing required env: ${lib.concatStringsSep ", " missing}";
-            };
-          mkConfigAssertion = p: {
-            assertion = !(configMissingStateDir p);
-            message = "programs.openclaw.instances.${instName}: plugin ${p.name} provides settings but declares no stateDirs (needed for config.json).";
+  pluginAssertions = lib.flatten (
+    lib.mapAttrsToList (
+      instName: inst:
+      let
+        plugins = resolvedPluginsByInstance.${instName} or [ ];
+        envFor = p: (p.config.env or { });
+        missingFor = p: lib.filter (req: !(builtins.hasAttr req (envFor p))) p.needs.requiredEnv;
+        configMissingStateDir = p: (p.config.settings or { }) != { } && (p.needs.stateDirs or [ ]) == [ ];
+        mkAssertion =
+          p:
+          let
+            missing = missingFor p;
+          in
+          {
+            assertion = missing == [ ];
+            message = "programs.openclaw.instances.${instName}: plugin ${p.name} missing required env: ${lib.concatStringsSep ", " missing}";
           };
-        in
-        (map mkAssertion plugins) ++ (map mkConfigAssertion plugins)
-      ) enabledInstances
-    );
+        mkConfigAssertion = p: {
+          assertion = !(configMissingStateDir p);
+          message = "programs.openclaw.instances.${instName}: plugin ${p.name} provides settings but declares no stateDirs (needed for config.json).";
+        };
+      in
+      (map mkAssertion plugins) ++ (map mkConfigAssertion plugins)
+    ) enabledInstances
+  );
 
   pluginConfigFiles =
     let

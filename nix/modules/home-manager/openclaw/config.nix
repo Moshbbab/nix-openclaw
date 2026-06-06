@@ -28,6 +28,7 @@ let
     systemd = cfg.systemd;
     plugins = openclawLib.effectivePlugins;
     runtimePlugins = cfg.runtimePlugins;
+    runtimePluginSources = cfg.runtimePluginSources;
     config = { };
     appDefaults = {
       enable = true;
@@ -133,9 +134,7 @@ let
         }) (cfg.environment // inst.environment));
       userConfig = stripNulls (lib.recursiveUpdate (stripNulls cfg.config) (stripNulls inst.config));
       nixSkillLoadDirs = files.skillLoadDirsForInstance name;
-      mergedConfigWithoutLoadPaths = stripNulls (
-        lib.recursiveUpdate baseConfig userConfig
-      );
+      mergedConfigWithoutLoadPaths = stripNulls (lib.recursiveUpdate baseConfig userConfig);
       existingOpenClawPluginLoadPaths = (
         ((mergedConfigWithoutLoadPaths.plugins or { }).load or { }).paths or [ ]
       );
@@ -146,8 +145,14 @@ let
       existingDenyList = ((userConfig.plugins or { }).deny or [ ]);
       userPluginEntries = ((userConfig.plugins or { }).entries or { });
       runtimePluginConfig = runtimePlugins.forInstance {
-        inherit name existingAllowList userPluginEntries;
+        inherit
+          name
+          existingAllowList
+          userPluginEntries
+          ;
+        openclawPackage = gatewayPackage;
         ids = inst.runtimePlugins;
+        sources = inst.runtimePluginSources;
         existingLoadPaths = existingOpenClawPluginLoadPaths;
         denyList = existingDenyList;
         nixOpenClawPluginIds = [ ];
@@ -158,9 +163,7 @@ let
         {
           plugins = {
             load = {
-              paths = lib.unique (
-                runtimePluginConfig.loadPaths ++ existingOpenClawPluginLoadPaths
-              );
+              paths = lib.unique (runtimePluginConfig.loadPaths ++ existingOpenClawPluginLoadPaths);
             };
           };
         }
