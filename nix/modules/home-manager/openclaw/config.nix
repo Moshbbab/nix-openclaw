@@ -11,6 +11,7 @@ let
   homeDir = openclawLib.homeDir;
   appPackage = openclawLib.appPackage;
   qmdPackage = openclawLib.qmdPackage;
+  toJSONWithContext = import ../../../lib/json-with-context.nix { inherit lib; };
 
   defaultInstance = {
     enable = cfg.enable;
@@ -229,11 +230,9 @@ let
           }
         else
           gatewayPackage;
+      rawConfigJson = toJSONWithContext mergedConfig;
       configJson =
-        if hasExecSecretFlow then
-          lib.warn execSecretFlowWarning (builtins.toJSON mergedConfig)
-        else
-          builtins.toJSON mergedConfig;
+        if hasExecSecretFlow then lib.warn execSecretFlowWarning rawConfigJson else rawConfigJson;
       configFile = pkgs.writeText "openclaw-${name}.json" configJson;
       agentIds =
         let
@@ -303,7 +302,8 @@ let
       homeFile = {
         name = openclawLib.toRelative inst.configPath;
         value = {
-          text = configJson;
+          source = configFile;
+          text = builtins.unsafeDiscardStringContext configJson;
           force = true;
         };
       };

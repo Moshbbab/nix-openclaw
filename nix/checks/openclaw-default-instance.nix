@@ -139,6 +139,9 @@ let
       attempted = builtins.tryEval (builtins.deepSeq value "ok");
     in
     if attempted.success then throw "${name}: expected evaluation failure." else "ok";
+  generatedConfig =
+    eval: path:
+    builtins.fromJSON eval.config.home.file."${path}".text;
 
   qmdPath =
     if pkgs.openclawPackages ? qmd then
@@ -153,9 +156,11 @@ let
       );
     in
     qmdPath != null && lib.hasInfix qmdPath pathText;
+  isPluginSkillPath =
+    path: lib.hasSuffix "/skill" path || lib.hasSuffix "-openclaw-plugin-skill-skill" path;
 
   defaultEval = moduleEval { };
-  defaultConfig = builtins.fromJSON defaultEval.config.home.file.".openclaw/openclaw.json".text;
+  defaultConfig = generatedConfig defaultEval ".openclaw/openclaw.json";
   hasLinuxUnit = builtins.hasAttr "openclaw-gateway" defaultEval.config.systemd.user.services;
   hasDarwinAgent = builtins.hasAttr "com.steipete.openclaw.gateway" defaultEval.config.launchd.agents;
   defaultCheck = builtins.deepSeq (requireNoAssertionFailures "default instance" defaultEval) (
@@ -176,12 +181,10 @@ let
       { source = alphaPluginSource; }
     ];
   };
-  customPluginConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext customPluginEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  customPluginConfig = generatedConfig customPluginEval ".openclaw/openclaw.json";
   customPluginSkillExtraDirs = ((customPluginConfig.skills or { }).load or { }).extraDirs or [ ];
   customPluginCheck = builtins.deepSeq (requireNoAssertionFailures "customPlugins" customPluginEval) (
-    if !(lib.any (path: lib.hasSuffix "/skill" path) customPluginSkillExtraDirs) then
+    if !(lib.any isPluginSkillPath customPluginSkillExtraDirs) then
       throw "customPlugins did not wire plugin skills into skills.load.extraDirs."
     else
       "ok"
@@ -202,10 +205,7 @@ let
       }
     ];
   };
-  multiAgentPluginSkillConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      multiAgentPluginSkillEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  multiAgentPluginSkillConfig = generatedConfig multiAgentPluginSkillEval ".openclaw/openclaw.json";
   multiAgentPluginSkillExtraDirs = (
     ((multiAgentPluginSkillConfig.skills or { }).load or { }).extraDirs or [ ]
   );
@@ -219,7 +219,7 @@ let
           throw "Multi-agent config lost writer workspace."
         else if !(lib.elem "/tmp/openclaw-research-workspace" multiAgentWorkspaces) then
           throw "Multi-agent config lost research workspace."
-        else if !(lib.any (path: lib.hasSuffix "/skill" path) multiAgentPluginSkillExtraDirs) then
+        else if !(lib.any isPluginSkillPath multiAgentPluginSkillExtraDirs) then
           throw "Custom plugin skill was not shared through skills.load.extraDirs for separate agent workspaces."
         else
           "ok"
@@ -263,9 +263,7 @@ let
       }
     ];
   };
-  userSkillConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext userSkillEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  userSkillConfig = generatedConfig userSkillEval ".openclaw/openclaw.json";
   userSkillExtraDirs = ((userSkillConfig.skills or { }).load or { }).extraDirs or [ ];
   generatedUserSkillExtraDirs = lib.filter (path: path != "/tmp/user-skill-root") userSkillExtraDirs;
   userSkillCheck = builtins.deepSeq (requireNoAssertionFailures "user skills" userSkillEval) (
@@ -383,9 +381,7 @@ let
       mode = "json";
     };
   };
-  secretProviderConfig =
-    builtins.fromJSON
-      secretProviderEval.config.home.file.".openclaw/openclaw.json".text;
+  secretProviderConfig = generatedConfig secretProviderEval ".openclaw/openclaw.json";
   secretProviderCheck =
     builtins.deepSeq (requireNoAssertionFailures "secrets.providers" secretProviderEval)
       (
@@ -453,8 +449,7 @@ let
     };
   };
   secretRefPassthroughConfig =
-    builtins.fromJSON
-      secretRefPassthroughEval.config.home.file.".openclaw/openclaw.json".text;
+    generatedConfig secretRefPassthroughEval ".openclaw/openclaw.json";
   secretRefGroqApiKey =
     ((secretRefPassthroughConfig.models or { }).providers or { }).groq.apiKey or { };
   secretRefFileApiKey =
@@ -529,10 +524,7 @@ let
     runtimePlugins = [ "slack" ];
     config.plugins.allow = [ "memory-core" ];
   };
-  runtimePluginConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      runtimePluginEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  runtimePluginConfig = generatedConfig runtimePluginEval ".openclaw/openclaw.json";
   runtimePluginLoadPaths = ((runtimePluginConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginEntry = ((runtimePluginConfig.plugins or { }).entries or { }).slack or { };
   runtimePluginAllow = ((runtimePluginConfig.plugins or { }).allow or [ ]);
@@ -582,10 +574,8 @@ let
       "discord"
     ];
   };
-  runtimePluginCatalogGeneratedConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      runtimePluginCatalogGeneratedEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  runtimePluginCatalogGeneratedConfig =
+    generatedConfig runtimePluginCatalogGeneratedEval ".openclaw/openclaw.json";
   runtimePluginCatalogGeneratedLoadPaths =
     ((runtimePluginCatalogGeneratedConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginCatalogGeneratedEntries = (
@@ -623,14 +613,10 @@ let
       "diagnostics-prometheus"
     ];
   };
-  runtimePluginInstanceOneConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      runtimePluginInstanceEval.config.home.file.".openclaw-one/openclaw.json".text
-  );
-  runtimePluginInstanceTwoConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      runtimePluginInstanceEval.config.home.file.".openclaw-two/openclaw.json".text
-  );
+  runtimePluginInstanceOneConfig =
+    generatedConfig runtimePluginInstanceEval ".openclaw-one/openclaw.json";
+  runtimePluginInstanceTwoConfig =
+    generatedConfig runtimePluginInstanceEval ".openclaw-two/openclaw.json";
   runtimePluginInstanceOneLoadPaths =
     ((runtimePluginInstanceOneConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginInstanceTwoLoadPaths =
@@ -722,10 +708,7 @@ let
     ];
     config.plugins.allow = [ "memory-core" ];
   };
-  runtimePluginSourceConfig = builtins.fromJSON (
-    builtins.unsafeDiscardStringContext
-      runtimePluginSourceEval.config.home.file.".openclaw/openclaw.json".text
-  );
+  runtimePluginSourceConfig = generatedConfig runtimePluginSourceEval ".openclaw/openclaw.json";
   runtimePluginSourceLoadPaths =
     ((runtimePluginSourceConfig.plugins or { }).load or { }).paths or [ ];
   runtimePluginSourceEntry =

@@ -8,6 +8,7 @@
 let
   resolvePath = openclawLib.resolvePath;
   toRelative = openclawLib.toRelative;
+  toJSONWithContext = import ../../../lib/json-with-context.nix { inherit lib; };
 
   resolveFlakePlugin =
     plugin:
@@ -177,7 +178,9 @@ let
                     {
                       name = toRelative (resolvePath ("~/" + dir + "/config.json"));
                       value = {
-                        text = builtins.toJSON cfg;
+                        source = pkgs.writeText "openclaw-plugin-${p.name}-config.json" (
+                          toJSONWithContext cfg
+                        );
                       };
                     }
                   ]

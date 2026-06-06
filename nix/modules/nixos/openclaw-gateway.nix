@@ -9,6 +9,7 @@ let
   cfg = config.services.openclaw-gateway;
   qmdPackage = pkgs.openclawPackages.qmd or null;
   qmdEnabled = (((cfg.config.memory or { }).backend or null) == "qmd");
+  toJSONWithContext = import ../../lib/json-with-context.nix { inherit lib; };
 
   deepConfigType = lib.types.mkOptionType {
     name = "openclaw-config-attrs";
@@ -17,7 +18,7 @@ let
     merge = _loc: defs: lib.foldl' lib.recursiveUpdate { } (map (d: d.value) defs);
   };
 
-  configJson = builtins.toJSON cfg.config;
+  configJson = toJSONWithContext cfg.config;
   generatedConfigFile = pkgs.writeText "openclaw.json" configJson;
   configFile = if cfg.configFile != null then cfg.configFile else generatedConfigFile;
 

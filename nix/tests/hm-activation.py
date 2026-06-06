@@ -14,7 +14,9 @@ machine.succeed("test -f /home/alice/.openclaw/workspace/LORE.md")
 machine.succeed("grep -q '\"skipBootstrap\":true' /home/alice/.openclaw/openclaw.json")
 machine.succeed("grep -q 'BEGIN NIX-REPORT' /home/alice/.openclaw/workspace/TOOLS.md")
 machine.succeed("grep -q '\"extraDirs\"' /home/alice/.openclaw/openclaw.json")
-machine.succeed("grep -q '/skill' /home/alice/.openclaw/openclaw.json")
+machine.succeed(
+    "grep -Eq '(/skill|openclaw-plugin-skill-)' /home/alice/.openclaw/openclaw.json"
+)
 machine.succeed("test ! -e /home/alice/.openclaw/workspace/skills/skill")
 machine.wait_until_succeeds(
     "test -x /home/alice/.openclaw/agents/main/agent/codex-home/home/.nix-profile/bin/jq"

@@ -10,6 +10,7 @@ let
   cfg = openclawLib.cfg;
   resolvePath = openclawLib.resolvePath;
   toolSets = openclawLib.toolSets;
+  toJSONWithContext = import ../../../lib/json-with-context.nix { inherit lib; };
   bootstrapFiles = cfg.workspace.bootstrapFiles;
   bootstrapFilesEnabled = bootstrapFiles != null;
   extraWorkspaceFiles = cfg.workspace.files or { };
@@ -26,7 +27,7 @@ let
       ++ lib.optionals (skill ? homepage && skill.homepage != null) [ "homepage: ${skill.homepage}" ]
       ++ lib.optionals (skill ? openclaw && skill.openclaw != null) [
         "openclaw:"
-        "  ${builtins.toJSON skill.openclaw}"
+        "  ${toJSONWithContext skill.openclaw}"
       ]
       ++ [ "---" ];
       frontmatter = lib.concatStringsSep "\n" frontmatterLines;
@@ -89,8 +90,17 @@ let
             else
               throw "Unsupported OpenClaw skill mode: ${mode}";
           pluginsForInstance = plugins.resolvedPluginsByInstance.${instName} or [ ];
+          pluginSkillDirs =
+            plugin:
+            map (
+              skill:
+              builtins.path {
+                name = "openclaw-plugin-skill-${builtins.baseNameOf skill}";
+                path = skill;
+              }
+            ) plugin.skills;
         in
-        map toString ((map dirFor cfg.skills) ++ (lib.flatten (map (p: p.skills) pluginsForInstance)));
+        map toString ((map dirFor cfg.skills) ++ (lib.flatten (map pluginSkillDirs pluginsForInstance)));
     in
     lib.mapAttrs dirsForInstance enabledInstances;
 

@@ -104,8 +104,7 @@ let
   };
 
   configPathKey = ".openclaw/openclaw.json";
-  configJson = moduleEval.config.home.file."${configPathKey}".text;
-  configFile = pkgs.writeText "openclaw-config.json" configJson;
+  configFile = moduleEval.config.home.file."${configPathKey}".source;
   expectedWorkspace = "/tmp/openclaw-explicit-workspace";
 
 in
