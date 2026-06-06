@@ -117,6 +117,10 @@ jobs:
         continue-on-error: true
         run: timeout --foreground 50m scripts/ci-nix-build.sh linux-ci .#checks.x86_64-linux.ci --accept-flake-config
 
+      - name: Summarize Linux HM activation timing
+        if: steps.ci.outcome == 'success'
+        run: scripts/summarize-hm-activation-timing.sh x86_64-linux linux-hm-activation
+
       - name: Record validation result
         id: validation
         if: always()
