@@ -1092,15 +1092,26 @@ Local proof for measured commit:
 | Removed HM doc paths | old/new closure name diff | `home-configuration-reference-manpage`, `home-manager.1`, `options.json`, `nixos-render-docs` present | new closure name diff | absent | removed from activation fixtures | `comm -23 /tmp/hm-old.names /tmp/hm-new.names` |
 | Local Darwin HM package rebuild | prior fixture with manuals enabled | n/a | `2896ac38` dirty local run | 6s, 7 planned/built derivations | recorded | `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-hm-manuals-off --accept-flake-config --no-link .#checks.aarch64-darwin.hm-activation-macos-package` |
 | Local Linux HM VM proof | prior fixture with manuals enabled | n/a | `2896ac38` dirty local run | 69s, 15 planned derivations, VM proof passed | recorded | `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-linux-hm-manuals-off --accept-flake-config --no-link .#checks.x86_64-linux.hm-activation` |
+| Remote Linux job duration | `27052324559` at `4cb703b5` | 138s | `27052580718` at `950f33fd` | 108s | 21.7% faster, runner/cache influenced | `gh run view <run> --json jobs` |
+| Remote macOS job duration | `27052324559` at `4cb703b5` | 149s | `27052580718` at `950f33fd` | 156s | 4.7% slower, runner variance | same |
+| Remote Linux aggregate step | `27052324559` parsed log | 128s, 926 fetched paths, 930 copied paths, 29 built drvs | `27052580718` parsed log | 98s, 925 fetched paths, 929 copied paths, 29 built drvs | 23.4% faster; graph mostly unchanged | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote macOS Darwin aggregate step | `27052324559` parsed log | 87s, 226 fetched paths, 230 copied paths, 0 built drvs | `27052580718` parsed log | 91s, 225 fetched paths, 229 copied paths, 0 built drvs | 4.6% slower; one fewer fetched/copied path | same |
+| Remote Linux build-closure paths | `27052324559` closure summary | 1,547 | `27052580718` closure summary | 1,539 | 8 fewer | `rg -n 'Build-closure paths' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote macOS build-closure paths | `27052324559` closure summary | 648 | `27052580718` closure summary | 640 | 8 fewer | same |
+| Remote `options.json` warnings | `27052324559` log | 2 matching warning lines | `27052580718` log | 0 matching warning lines | removed | `rg -n "options\\.json|Using 'builtins\\.toFile'" /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote HM manpage copy paths | `27052324559` log | `home-configuration-reference-manpage` copied on Linux and macOS | `27052580718` log | absent | removed | `rg -n 'home-configuration-reference-manpage' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
 
 Interpretation:
 
 - This is a small real simplification of the activation proof closure. It does
   not move the main Linux bottleneck: QEMU/NixOS VM proof, OpenClaw gateway,
   default tools, and Node still dominate.
-- The expected remote CI effect is fewer generated Home Manager doc paths and
-  fewer warnings, not a large wall-time improvement.
-- Remote GitHub Actions proof is still required after pushing this commit.
+- The remote proof confirms the expected effect: generated Home Manager doc
+  paths and the `options.json` context warning disappear from the activation
+  fixture path.
+- The Linux wall-time improvement is useful but not fully attributable to this
+  tiny closure change. Treat the 8-path closure reduction and removed warnings
+  as the durable improvement, and treat job duration as runner/cache evidence.
 
 Local proof for measured commit:
 
@@ -1112,6 +1123,15 @@ Local proof for measured commit:
 - `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-darwin-ci-hm-manuals-off --accept-flake-config --option max-jobs 2 --no-link .#checks.aarch64-darwin.ci`
 - `RUNNER_TEMP=/tmp scripts/ci-nix-build.sh local-linux-ci-hm-manuals-off --accept-flake-config --no-link .#checks.x86_64-linux.ci`
 - `git diff --check`
+
+Remote proof for pushed head:
+
+- `27052580718`, success, `pull_request`,
+  `2026-06-06T04:28:54Z` to `2026-06-06T04:31:32Z`.
+- PR status at pushed head `950f33fdcf88`: `CLEAN`; GitHub Actions Linux and
+  macOS, Garnix, Socket Security, and flake evaluation checks passed.
+- `rg -n "options\\.json|home-configuration-reference-manpage|nixos-render-docs|Using 'builtins\\.toFile'" /tmp/nix-openclaw-ci-logs/run-27052580718.log`
+  returned no matches.
 
 ## Add A Run
 
