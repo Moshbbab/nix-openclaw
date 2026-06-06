@@ -158,7 +158,7 @@ function recordLine(group, rawLine) {
   }
 
   const built = plainLine.match(/building '([^']+\.drv)'/);
-  if (built) {
+  if (built && !isNixJsonBuildStart(nixEvent)) {
     markSignal(group, timestamp);
     group.firstBuildTimestamp ||= timestamp;
     group.lastBuildTimestamp = timestamp || group.lastBuildTimestamp;
@@ -270,6 +270,10 @@ function recordNixJsonBuildStart(group, timestamp, type, event) {
   group.builtDrvs.add(drvPath);
   const name = drvName(drvPath);
   group.builtNames.set(name, (group.builtNames.get(name) || 0) + 1);
+}
+
+function isNixJsonBuildStart(event) {
+  return Boolean(event && event.action === "start" && nixActivityTypeName(event.type) === "Build");
 }
 
 function nixActivityTypeName(type) {
