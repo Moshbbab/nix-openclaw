@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 function usage() {
   process.stderr.write(`Usage:
-  scripts/summarize-nix-build-closure.mjs [--label <label>] [--limit <count>] [--summary-file <path>] <outputs-file>
+  maintainers/scripts/summarize-nix-build-closure.mjs [--label <label>] [--limit <count>] [--summary-file <path>] <outputs-file>
 `);
 }
 

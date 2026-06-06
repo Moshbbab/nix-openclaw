@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 function usage() {
   process.stderr.write(`Usage:
-  scripts/summarize-nixos-test-log.mjs [--label <label>] [--limit <count>] [--summary-file <path>] <log>
+  maintainers/scripts/summarize-nixos-test-log.mjs [--label <label>] [--limit <count>] [--summary-file <path>] <log>
 `);
 }
 

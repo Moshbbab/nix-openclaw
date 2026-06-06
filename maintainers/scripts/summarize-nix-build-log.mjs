@@ -3,8 +3,8 @@ import fs from "node:fs";
 
 function usage() {
   process.stderr.write(`Usage:
-  scripts/summarize-nix-build-log.mjs [--label <label>] [--seconds <seconds>] [--summary-file <path>] <log>
-  scripts/summarize-nix-build-log.mjs --github-log <log>
+  maintainers/scripts/summarize-nix-build-log.mjs [--label <label>] [--seconds <seconds>] [--summary-file <path>] <log>
+  maintainers/scripts/summarize-nix-build-log.mjs --github-log <log>
 `);
 }
 
@@ -80,30 +80,6 @@ function emptyGroup(label) {
     firstBuildTimestamp: null,
     lastBuildTimestamp: null,
     firstInputFetchTimestamp: null,
-    evalStatsSection: null,
-    evalStats: {
-      cpuSeconds: null,
-      gcFraction: null,
-      waitingSeconds: null,
-      expressions: null,
-      thunks: null,
-      functionCalls: null,
-      primOpCalls: null,
-      values: null,
-      sets: null,
-      envs: null,
-      lists: null,
-      symbols: null,
-    },
-    internalJson: {
-      events: 0,
-      starts: 0,
-      stops: 0,
-      results: 0,
-      active: new Map(),
-      completed: [],
-      startTypes: new Map(),
-    },
   };
 }
 
@@ -114,14 +90,7 @@ function recordLine(group, rawLine) {
     group.lastTimestamp = timestamp;
   }
 
-  const nixEvent = parseNixJsonEvent(message);
-  if (nixEvent) {
-    recordNixJsonEvent(group, timestamp, nixEvent);
-  }
-
-  const line = nixEvent ? nixEventText(nixEvent, message) : message;
-  const plainLine = stripAnsi(line);
-  recordEvalStats(group, plainLine);
+  const plainLine = stripAnsi(message);
 
   const fetchPlan = plainLine.match(
     /these ([0-9]+) paths will be fetched \(([^,]+) download, ([^)]+) unpacked\)/,
@@ -158,7 +127,7 @@ function recordLine(group, rawLine) {
   }
 
   const built = plainLine.match(/building '([^']+\.drv)'/);
-  if (built && !isNixJsonBuildStart(nixEvent)) {
+  if (built) {
     markSignal(group, timestamp);
     group.firstBuildTimestamp ||= timestamp;
     group.lastBuildTimestamp = timestamp || group.lastBuildTimestamp;
@@ -184,189 +153,10 @@ function stripAnsi(value) {
   return value.replace(/\x1B\[[0-9;]*m/g, "");
 }
 
-function parseNixJsonEvent(line) {
-  const trimmed = line.trim();
-  const json = trimmed.startsWith("@nix ") ? trimmed.slice(5) : trimmed;
-  if (!json.startsWith("{")) {
-    return null;
-  }
-
-  try {
-    const event = JSON.parse(json);
-    if (event && typeof event.action === "string") {
-      return event;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-function nixEventText(event, fallback) {
-  return event.text || event.msg || fallback;
-}
-
-function recordNixJsonEvent(group, timestamp, event) {
-  group.internalJson.events += 1;
-
-  if (event.action === "start") {
-    group.internalJson.starts += 1;
-    const type = nixActivityTypeName(event.type);
-    recordNixJsonBuildStart(group, timestamp, type, event);
-    group.internalJson.startTypes.set(
-      type,
-      (group.internalJson.startTypes.get(type) || 0) + 1,
-    );
-    group.internalJson.active.set(event.id, {
-      id: event.id,
-      type,
-      text: event.text || type,
-      fields: Array.isArray(event.fields) ? event.fields : [],
-      startedAt: timestamp,
-      lastPhase: null,
-    });
-    return;
-  }
-
-  if (event.action === "stop") {
-    group.internalJson.stops += 1;
-    const active = group.internalJson.active.get(event.id);
-    if (active) {
-      active.stoppedAt = timestamp;
-      active.durationSeconds = durationSeconds(active.startedAt, timestamp);
-      group.internalJson.completed.push(active);
-      group.internalJson.active.delete(event.id);
-      if (active.type === "Build" && timestamp) {
-        group.lastBuildTimestamp = timestamp;
-      }
-    }
-    return;
-  }
-
-  if (event.action === "result") {
-    group.internalJson.results += 1;
-    const active = group.internalJson.active.get(event.id);
-    if (active && event.type === 104 && Array.isArray(event.fields)) {
-      active.lastPhase = String(event.fields[0] || "");
-    }
-  }
-}
-
-function recordNixJsonBuildStart(group, timestamp, type, event) {
-  if (type !== "Build" || !Array.isArray(event.fields)) {
-    return;
-  }
-  const drvPath = event.fields.find(
-    (field) => typeof field === "string" && field.endsWith(".drv"),
-  );
-  if (!drvPath) {
-    return;
-  }
-
-  markSignal(group, timestamp);
-  group.firstBuildTimestamp ||= timestamp;
-  group.lastBuildTimestamp = timestamp || group.lastBuildTimestamp;
-  group.builtDrvLines += 1;
-  group.builtDrvs.add(drvPath);
-  const name = drvName(drvPath);
-  group.builtNames.set(name, (group.builtNames.get(name) || 0) + 1);
-}
-
-function isNixJsonBuildStart(event) {
-  return Boolean(event && event.action === "start" && nixActivityTypeName(event.type) === "Build");
-}
-
-function nixActivityTypeName(type) {
-  const names = {
-    0: "Unknown",
-    100: "CopyPath",
-    101: "FileTransfer",
-    102: "Realise",
-    103: "CopyPaths",
-    104: "Builds",
-    105: "Build",
-    106: "OptimiseStore",
-    107: "VerifyPaths",
-    108: "Substitute",
-    109: "QueryPathInfo",
-    110: "PostBuildHook",
-    111: "BuildWaiting",
-    112: "FetchTree",
-  };
-  return names[type] || `Activity${type}`;
-}
-
-function durationSeconds(start, end) {
-  if (!start || !end) {
-    return null;
-  }
-  const seconds = (Date.parse(end) - Date.parse(start)) / 1000;
-  return Number.isFinite(seconds) && seconds >= 0 ? seconds : null;
-}
-
 function markSignal(group, timestamp) {
   if (timestamp) {
     group.firstSignalTimestamp ||= timestamp;
   }
-}
-
-function recordEvalStats(group, line) {
-  const section = line.match(/^\s*"([^"]+)":\s*\{\s*,?$/);
-  if (section) {
-    group.evalStatsSection = section[1];
-    return;
-  }
-  if (/^\s*}\s*,?\s*$/.test(line)) {
-    group.evalStatsSection = null;
-    return;
-  }
-
-  const topLevelStats = {
-    cpuTime: "cpuSeconds",
-    nrExprs: "expressions",
-    nrFunctionCalls: "functionCalls",
-    nrPrimOpCalls: "primOpCalls",
-    nrThunks: "thunks",
-    waitingTime: "waitingSeconds",
-  };
-  for (const [key, field] of Object.entries(topLevelStats)) {
-    const value = matchJsonNumber(line, key);
-    if (value !== null) {
-      group.evalStats[field] = value;
-    }
-  }
-
-  if (group.evalStatsSection === "time") {
-    const gcFraction = matchJsonNumber(line, "gcFraction");
-    if (gcFraction !== null) {
-      group.evalStats.gcFraction = gcFraction;
-    }
-  }
-
-  const sectionCounts = {
-    values: "values",
-    sets: "sets",
-    envs: "envs",
-    list: "lists",
-    symbols: "symbols",
-  };
-  const sectionField = sectionCounts[group.evalStatsSection];
-  if (sectionField) {
-    const count = matchJsonNumber(line, "number");
-    if (count !== null) {
-      group.evalStats[sectionField] = count;
-    }
-  }
-}
-
-function matchJsonNumber(line, key) {
-  const pattern = new RegExp(`^\\s*"${escapeRegExp(key)}":\\s*([0-9]+(?:\\.[0-9]+)?)\\s*,?\\s*$`);
-  const match = line.match(pattern);
-  return match ? Number(match[1]) : null;
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function splitTimestamp(line) {
@@ -449,8 +239,7 @@ function hasSignal(group) {
     group.copiedPathLines > 0 ||
     group.builtDrvLines > 0 ||
     group.unpackedInputs > 0 ||
-    group.warningCount > 0 ||
-    group.internalJson.events > 0
+    group.warningCount > 0
   );
 }
 
@@ -488,22 +277,10 @@ function render(groups, title) {
   const details = finished.filter(
     (group) =>
       group.builtNames.size > 0 ||
-      group.copySources.size > 0 ||
-      hasPhaseHints(group) ||
-      hasEvalStats(group) ||
-      hasNixJsonActivity(group),
+      group.copySources.size > 0,
   );
   for (const group of details) {
     lines.push("", `#### ${group.label}`, "");
-    if (hasPhaseHints(group)) {
-      lines.push(`Phase hints: ${formatPhaseHints(group)}`);
-    }
-    if (hasEvalStats(group)) {
-      lines.push(`Eval stats: ${formatEvalStats(group.evalStats)}`);
-    }
-    if (hasNixJsonActivity(group)) {
-      lines.push(`Structured Nix events: ${formatNixJsonActivity(group)}`);
-    }
     if (group.copySources.size > 0) {
       lines.push(`Copy sources: ${formatTopMap(group.copySources, 4)}`);
       for (const sourceLine of formatCustomCopySourceNames(group.copiedNamesBySource)) {
@@ -576,134 +353,6 @@ function isCustomCopySource(source) {
     "https://cache.nixos.org",
     "https://install.determinate.systems",
   ].includes(source);
-}
-
-function hasPhaseHints(group) {
-  return Boolean(
-    group.firstTimestamp &&
-      (group.firstInputFetchTimestamp ||
-        group.firstFetchPlanTimestamp ||
-        group.firstBuildPlanTimestamp ||
-        group.firstCopyTimestamp ||
-        group.firstBuildTimestamp),
-  );
-}
-
-function formatPhaseHints(group) {
-  const base = group.firstTimestamp;
-  const hints = [];
-  pushOffset(hints, "input fetch", base, group.firstInputFetchTimestamp);
-  pushOffset(hints, "fetch plan", base, group.firstFetchPlanTimestamp);
-  pushOffset(hints, "build plan", base, group.firstBuildPlanTimestamp);
-  pushWindow(hints, "copy", base, group.firstCopyTimestamp, group.lastCopyTimestamp);
-  pushWindow(hints, "build", base, group.firstBuildTimestamp, group.lastBuildTimestamp);
-  return hints.join(", ");
-}
-
-function pushOffset(hints, label, base, timestamp) {
-  if (timestamp) {
-    hints.push(`${label} +${formatOffset(base, timestamp)}`);
-  }
-}
-
-function pushWindow(hints, label, base, start, end) {
-  if (!start) {
-    return;
-  }
-  const startOffset = formatOffset(base, start);
-  if (!end || end === start) {
-    hints.push(`${label} +${startOffset}`);
-    return;
-  }
-  hints.push(`${label} +${startOffset}..+${formatOffset(base, end)}`);
-}
-
-function formatOffset(base, timestamp) {
-  const seconds = (Date.parse(timestamp) - Date.parse(base)) / 1000;
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    return "?s";
-  }
-  return formatSeconds(seconds);
-}
-
-function hasEvalStats(group) {
-  return Object.values(group.evalStats).some((value) => value !== null);
-}
-
-function formatEvalStats(stats) {
-  const fields = [];
-  if (stats.cpuSeconds !== null) {
-    fields.push(`cpu ${formatSeconds(stats.cpuSeconds)}s`);
-  }
-  if (stats.gcFraction !== null) {
-    fields.push(`gc ${(stats.gcFraction * 100).toFixed(1)}%`);
-  }
-  if (stats.thunks !== null) {
-    fields.push(`thunks ${formatCount(stats.thunks)}`);
-  }
-  if (stats.values !== null) {
-    fields.push(`values ${formatCount(stats.values)}`);
-  }
-  if (stats.functionCalls !== null) {
-    fields.push(`calls ${formatCount(stats.functionCalls)}`);
-  }
-  if (stats.primOpCalls !== null) {
-    fields.push(`primops ${formatCount(stats.primOpCalls)}`);
-  }
-  if (stats.waitingSeconds !== null) {
-    fields.push(`waiting ${formatSeconds(stats.waitingSeconds)}s`);
-  }
-  return fields.join(", ");
-}
-
-function formatCount(value) {
-  return new Intl.NumberFormat("en-US").format(value);
-}
-
-function hasNixJsonActivity(group) {
-  return group.internalJson.events > 0;
-}
-
-function formatNixJsonActivity(group) {
-  const parts = [
-    `${formatCount(group.internalJson.events)} events`,
-    `${formatCount(group.internalJson.starts)} starts`,
-    `${formatCount(group.internalJson.stops)} stops`,
-    `${formatCount(group.internalJson.results)} results`,
-  ];
-  if (group.internalJson.startTypes.size > 0) {
-    parts.push(`start types ${formatTopMap(group.internalJson.startTypes, 6)}`);
-  }
-
-  const timed = group.internalJson.completed
-    .filter((activity) => activity.durationSeconds !== null)
-    .sort((left, right) => {
-      return right.durationSeconds - left.durationSeconds || left.text.localeCompare(right.text);
-    })
-    .slice(0, 6);
-  if (timed.length > 0) {
-    parts.push(`top spans ${timed.map(formatNixJsonSpan).join("; ")}`);
-  } else if (group.internalJson.completed.length > 0) {
-    parts.push("top spans unavailable without timestamped internal-json lines");
-  }
-
-  return parts.join(", ");
-}
-
-function formatNixJsonSpan(activity) {
-  const phase = activity.lastPhase ? `, last phase ${activity.lastPhase}` : "";
-  const label =
-    activity.text === activity.type
-      ? activity.type
-      : `${activity.type} ${shorten(activity.text, 110)}`;
-  return `${label} (${formatSeconds(activity.durationSeconds)}s${phase})`;
-}
-
-function shorten(value, limit) {
-  if (value.length <= limit) {
-    return value;
-  }
-  return `${value.slice(0, limit - 3)}...`;
 }
 
 try {

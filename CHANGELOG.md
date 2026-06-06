@@ -10,6 +10,18 @@ Older repository history is available in git.
 
 ## 2026-06-06
 
+### Changed
+
+- Changed the stable `openclaw` / `openclaw-gateway` package path to build from
+  upstream's published npm package and shrinkwrap by default. Source/pnpm builds
+  remain available for dogfood and explicit source overrides.
+- Updated stable pin automation to refresh the npm wrapper lockfile and
+  `gatewayNpmDepsHash` with each selected upstream source release.
+- Narrowed the default CI/apply gate to the default install, config, gateway,
+  and module activation contract. QMD, runtime plugin catalog/smoke,
+  plugin-instance, dogfood, and source-override proofs remain explicit check
+  outputs.
+
 ### Added
 
 - Added `programs.openclaw.runtimePluginSources` for locked,

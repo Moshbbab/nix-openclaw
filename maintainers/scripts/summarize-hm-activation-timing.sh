@@ -4,7 +4,7 @@ set -euo pipefail
 system="${1:-x86_64-linux}"
 label="${2:-${system}-hm-activation}"
 
-repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 log_dir="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/nix-openclaw-ci-meter"
 safe_label=$(printf '%s' "$label" | tr -c 'A-Za-z0-9_.-' '-')
 log_path="$log_dir/${safe_label}.nixos-test.log"
@@ -23,4 +23,4 @@ if ! nix log "$drv" > "$log_path" 2>&1; then
   exit 0
 fi
 
-"$repo_root/scripts/summarize-nixos-test-log.mjs" --label "$label" "$log_path" || true
+"$repo_root/maintainers/scripts/summarize-nixos-test-log.mjs" --label "$label" "$log_path" || true

@@ -115,11 +115,11 @@ jobs:
         id: ci
         if: steps.materialize.outcome == 'success' && steps.owners.outcome == 'success'
         continue-on-error: true
-        run: timeout --foreground 50m scripts/ci-nix-build.sh linux-ci .#checks.x86_64-linux.ci --accept-flake-config
+        run: timeout --foreground 50m maintainers/scripts/ci-nix-build.sh linux-ci .#checks.x86_64-linux.ci --accept-flake-config
 
       - name: Summarize Linux HM activation timing
         if: steps.ci.outcome == 'success'
-        run: scripts/summarize-hm-activation-timing.sh x86_64-linux linux-hm-activation
+        run: maintainers/scripts/summarize-hm-activation-timing.sh x86_64-linux linux-hm-activation
 
       - name: Record validation result
         id: validation
@@ -190,7 +190,7 @@ jobs:
         if: steps.materialize.outcome == 'success'
         continue-on-error: true
         timeout-minutes: 25
-        run: scripts/ci-nix-build.sh darwin-ci --accept-flake-config --option max-jobs 2 .#checks.aarch64-darwin.ci
+        run: maintainers/scripts/ci-nix-build.sh darwin-ci --accept-flake-config --option max-jobs 2 .#checks.aarch64-darwin.ci
 
       - name: Run HM activation
         id: hm
