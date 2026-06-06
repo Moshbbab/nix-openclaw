@@ -138,6 +138,7 @@ nixpkgs `16c7794d0a28b5a37904d55bcca36003b9109aaa`.
 | `pr100-runtime-plugin-lock-split-2026-06-06` | `198df99f82bc` | `afc82b33b683` | split broad runtime plugin lock proof out of the default CI gate | default `ci` inputs 13 -> 12 on both systems; explicit lock proof retained |
 | `pr100-linux-hm-test-timing-2026-06-06` | `54af8ba86897` | `d672cd2bcd51` | add remote NixOS VM apply-proof timing after current Nix build tooling scan | no graph change; Linux VM bottleneck split into boot/HM/gateway phases |
 | `pr100-linux-gateway-startup-trace-2026-06-06` | `a69a1b583f35` | `fd4ff9947235` | expose upstream gateway startup spans in the Linux HM timing summary | no speed win; remaining TCP wait is larger than measured gateway spans |
+| `pr100-linux-hm-default-fixture-simplification-2026-06-06` | `621be9a52fda` | `76b2013f806` | remove custom plugin fixture from the default Linux HM apply proof | simpler default proof; favorable timing sample, no direct-input graph win |
 
 ## Runs
 
@@ -2004,6 +2005,85 @@ Remote proof for measured commit:
   `1.50s`.
 - PR merge state after the run: `CLEAN`.
 - Garnix checks remained green on the same head.
+
+### `pr100-linux-hm-default-fixture-simplification-2026-06-06`
+
+- PR: `#100`
+- Base commit: `621be9a52fda1b7dbbf1ffdde7ea246ee65a2103`
+- Measured code commit: `76b2013f8063c39538f4e7cc2b2732eb910fa5ca`
+- Purpose:
+  - remove the custom plugin fixture from the default Linux Home Manager
+    activation VM;
+  - keep PR #100 focused on the default npm-backed OpenClaw install/apply
+    contract while PR #99 owns plugin shrinkwrap/materialization;
+  - leave custom plugin behavior covered by `openclaw-default-instance` eval
+    checks instead of duplicating it in the default VM proof.
+- Anti-regression review:
+  - Default install/apply proof remains: Home Manager service success,
+    generated `openclaw.json`, workspace materialization, runtime profile
+    executable, systemd user service, gateway service start, and TCP readiness.
+  - No public module option, package output, or `programs.openclaw.runtimePlugins`
+    interface changed.
+  - This is a simplification and favorable timing sample, not a stable graph
+    speed claim: direct HM/CI derivation fan-out is unchanged and the changed
+    VM test necessarily rebuilt its derivations.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Linux HM default-proof fixture refs | `621be9a52` HM check file | 5 | `76b2013f` HM check file | 0 | removed | `git show <sha>:nix/checks/openclaw-hm-activation.nix \| rg -c 'lockedPathFlake\|alphaPluginSource\|customPlugins'` |
+| Linux HM plugin-specific VM assertions | `621be9a52` test script | 3 | `76b2013f` test script | 0 | removed | `git show <sha>:nix/tests/hm-activation.py \| rg -c 'extraDirs\|openclaw-plugin-skill\|workspace/skills/skill'` |
+| Code/test surface | diff `621be9a52..76b2013f` | n/a | same diff | 20 deleted lines | simpler | `git diff --shortstat 621be9a52 76b2013f -- nix/checks/openclaw-hm-activation.nix nix/tests/hm-activation.py` |
+| Linux HM direct derivation inputs | `621be9a52` HM drv `/nix/store/bf48...hm-activation.drv` | 3 | `76b2013f` HM drv `/nix/store/mxfl...hm-activation.drv` | 3 | unchanged | `nix derivation show "$drv" \| jq '.derivations[] \| .inputs.drvs \| keys \| length'` |
+| Linux HM direct source inputs | same HM drvs | 2 | same HM drvs | 2 | unchanged | `nix derivation show "$drv" \| jq '.derivations[] \| .inputs.srcs \| length'` |
+| Linux `ci` direct derivation inputs | `621be9a52` CI drv `/nix/store/ywij...nix-openclaw-ci.drv` | 12 | `76b2013f` CI drv `/nix/store/i7av...nix-openclaw-ci.drv` | 12 | unchanged | same `nix derivation show` shape |
+| Linux `ci` direct source inputs | same CI drvs | 2 | same CI drvs | 2 | unchanged | same |
+| Local Linux HM proof | dirty worktree matching `76b2013f` source | n/a | remote Linux builder | 64s, success | proof retained | `RUNNER_TEMP=/tmp NIX_METER_BUILD_CLOSURE=0 scripts/ci-nix-build.sh local-linux-hm-default-only --accept-flake-config --no-link .#checks.x86_64-linux.hm-activation` |
+| Remote Linux aggregate parsed step | run `27057847656`, head `621be9a52` | 123s, 924 fetched paths, 928 copied paths, 26 built drvs | run `27058158807`, head `76b2013f` | 100s, 922 fetched paths, 926 copied paths, 29 built drvs | 23s faster sample; 3 more builds from changed VM proof | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Linux wrapper seconds | run `27057847656` | 118s | run `27058158807` | 98s | 20s faster sample | `rg -n 'nix-meter: end label=linux-ci' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Linux VM test script timing | run `27057847656` timing summary | 30.9s | run `27058158807` timing summary | 20.8s | 10.1s faster sample | `rg -n 'run the VM test script' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote gateway TCP readiness timing | run `27057847656` timing summary | 14.0s | run `27058158807` timing summary | 9.47s | 4.53s faster sample | `rg -n 'waiting for TCP port 18999' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Home Manager success timing | run `27057847656` timing summary | 10.9s | run `27058158807` timing summary | 7.76s | 3.14s faster sample | `rg -n 'home-manager-alice.service' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote VM boot timing | run `27057847656` timing summary | 10.6s | run `27058158807` timing summary | 7.55s | 3.05s faster sample | `rg -n 'waiting for the VM to finish booting' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote macOS aggregate parsed step | run `27057847656` | 62s, 226 fetched paths, 0 built drvs | run `27058158807` | 64s, 226 fetched paths, 0 built drvs | 2s slower sample; graph unchanged | parser command above |
+| Remote macOS job duration | run `27057847656` | 1m41s | run `27058158807` | 1m41s | unchanged sample | `gh run view <run> --json jobs` |
+| Garnix all checks | PR status at `621be9a52` | success | PR status at `76b2013f` | success, 25s | green | `gh pr view 100 --json statusCheckRollup` |
+
+Interpretation:
+
+- Count this as a default-proof simplification, not a direct Nix graph
+  optimization. The patch removes PR #99/plugin fixture hardcoding from the
+  default Linux apply proof while preserving the default install/apply contract.
+- The remote Linux timing sample improved, including the VM phase rows, but the
+  direct derivation input counts stayed unchanged and the run rebuilt three
+  more derivations because the VM proof changed. Treat the timing gain as useful
+  evidence, not a stable structural speed guarantee.
+- The SOTA build-analysis scan still points at the existing stack for this repo:
+  timestamped Nix logs, `NIX_SHOW_STATS`, build-result JSON, closure summaries,
+  optional internal-json sidecars, `nix-eval-jobs --check-cache-status`, and
+  local eval profiles. Newer closure UIs remain manual orientation tools rather
+  than default CI proof.
+
+Local proof for measured commit:
+
+- `git diff --check`
+- `nix eval --accept-flake-config --raw .#checks.x86_64-linux.hm-activation.drvPath`
+- `nix eval --accept-flake-config --raw .#checks.x86_64-linux.ci.drvPath`
+- `nix eval --accept-flake-config --raw .#checks.x86_64-linux.default-instance.drvPath`
+- `RUNNER_TEMP=/tmp NIX_METER_BUILD_CLOSURE=0 scripts/ci-nix-build.sh local-linux-hm-default-only --accept-flake-config --no-link .#checks.x86_64-linux.hm-activation`
+
+Remote proof for measured commit:
+
+- GitHub Actions run: `27058158807`, success, `pull_request`, head
+  `76b2013f8063c39538f4e7cc2b2732eb910fa5ca`.
+- Linux job `1m55s`; aggregate step `100s`; wrapper `98s`; timing step `6s`;
+  `922` planned fetched paths; `926` copied paths; `29` planned/built
+  derivations.
+- Linux timing summary reported VM test script `20.8s`, TCP readiness `9.47s`,
+  Home Manager success `7.76s`, and VM boot `7.55s`.
+- macOS job `1m41s`; Darwin aggregate step `64s`; HM activation parsed step
+  `1.39s`.
+- PR merge state after the run: `CLEAN`.
+- Garnix and Socket checks remained green on the same head.
 
 ## Add A Run
 
