@@ -137,6 +137,7 @@ nixpkgs `16c7794d0a28b5a37904d55bcca36003b9109aaa`.
 | `pr100-darwin-activation-reuse-2026-06-06` | `786cc73dc4aa` | `6d329708bd51` | reuse the Darwin CI aggregate activation package for the impure launchd smoke | macOS activation step faster; apply proof retained |
 | `pr100-runtime-plugin-lock-split-2026-06-06` | `198df99f82bc` | `afc82b33b683` | split broad runtime plugin lock proof out of the default CI gate | default `ci` inputs 13 -> 12 on both systems; explicit lock proof retained |
 | `pr100-linux-hm-test-timing-2026-06-06` | `54af8ba86897` | `d672cd2bcd51` | add remote NixOS VM apply-proof timing after current Nix build tooling scan | no graph change; Linux VM bottleneck split into boot/HM/gateway phases |
+| `pr100-linux-gateway-startup-trace-2026-06-06` | `a69a1b583f35` | `fd4ff9947235` | expose upstream gateway startup spans in the Linux HM timing summary | no speed win; remaining TCP wait is larger than measured gateway spans |
 
 ## Runs
 
@@ -1935,6 +1936,72 @@ Remote proof for measured commit:
   planned fetched paths; `928` copied paths; `26` planned/built derivations.
 - macOS job `1m50s`; Darwin aggregate step `70s`; HM activation parsed step
   `1.67s`.
+- PR merge state after the run: `CLEAN`.
+- Garnix checks remained green on the same head.
+
+### `pr100-linux-gateway-startup-trace-2026-06-06`
+
+- PR: `#100`
+- Base commit: `a69a1b583f35577faacd7dc6b33fbbb8ee80fde0`
+- Measured code commit: `fd4ff99472356b610bf04a1d0bfc46b7fe27583f`
+- Purpose:
+  - use upstream OpenClaw `OPENCLAW_GATEWAY_STARTUP_TRACE=1` in the Linux Home
+    Manager VM proof;
+  - surface gateway startup spans from the existing NixOS test-driver log;
+  - reject the earlier local `OPENCLAW_SKIP_STARTUP_MODEL_PREWARM` experiment
+    because upstream binds HTTP before post-attach sidecars and
+    `OPENCLAW_SKIP_CHANNELS=1` already bypasses model prewarm in this test.
+- Anti-regression review:
+  - This changes only the Linux VM test environment and timing summarizer.
+  - No package output, module option, user-facing interface, or default package
+    graph changes.
+  - Startup trace is a test-only log aid and does not make a speed claim.
+
+| Metric | Baseline provenance | Baseline | Measured provenance | Measured | Change | Command |
+| --- | --- | ---: | --- | ---: | ---: | --- |
+| Remote gateway startup trace events | run `27057406890`, head `a69a1b58` | 0 | run `27057741355`, head `fd4ff994` | 43 | added | `rg -n 'Gateway startup trace\\|more \\\\| - \\\\| - \\\\| -' /tmp/nix-openclaw-ci-logs/job-79865079921.log` |
+| Slowest gateway startup span | no trace | n/a | run `27057741355` | `gateway.server-impl-import` 439.2ms | measured | `rg -n 'Slowest gateway startup spans' /tmp/nix-openclaw-ci-logs/job-79865079921.log` |
+| Other top startup spans | no trace | n/a | run `27057741355` | `cli.config-snapshot` 405.6ms; `runtime.early` 134.5ms; `gateway.handlers` 126.7ms; `plugins.bootstrap` 103.8ms | measured | same |
+| Remote gateway TCP readiness timing | run `27057406890` timing summary | 12.8s | run `27057741355` timing summary | 12.9s | unchanged sample | `rg -n 'waiting for TCP port 18999' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote HM VM test script timing | run `27057406890` timing summary | 29.5s | run `27057741355` timing summary | 29.9s | unchanged sample | same |
+| Remote Linux aggregate parsed step | run `27057406890`, head `a69a1b58` | 117s, 924 fetched paths, 26 built drvs | run `27057741355`, head `fd4ff994` | 122s, 924 fetched paths, 26 built drvs | graph unchanged; 5s slower sample | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Linux aggregate wrapper seconds | run `27057406890` | 117s | run `27057741355` | 118s | unchanged | `rg -n 'nix-meter: end label=linux-ci' /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote Linux job duration | run `27057406890` | 2m10s | run `27057741355` | 2m18s | 8s slower sample | `gh run view <run> --json jobs` |
+| Remote macOS aggregate parsed step | run `27057406890` | 61s, 226 fetched paths, 0 built drvs | run `27057741355` | 65s, 226 fetched paths, 0 built drvs | graph unchanged; 4s slower sample | parser command above |
+| Garnix all checks | run `27057406890` PR checks | success, 27s | run `27057741355` PR checks | success, 29s | green | `gh pr view 100 --json statusCheckRollup` |
+
+Interpretation:
+
+- Do not count this as a CI speed improvement. It is a measurement improvement
+  for the remaining Linux apply-proof bottleneck.
+- The remote Linux gateway TCP wait is still about `13s`, but the largest
+  reported OpenClaw startup spans are sub-second. The next speed target should
+  be the VM/systemd/process-start boundary or removing redundant work from the
+  Linux apply proof, not tuning model prewarm or post-attach sidecars.
+- The CI aggregate graph is unchanged: same `924` fetched paths and same `26`
+  built derivations in the sampled Linux run.
+
+Local proof for measured commit:
+
+- `git diff --check`
+- `node --check scripts/summarize-nixos-test-log.mjs`
+- `bash -n scripts/summarize-hm-activation-timing.sh scripts/ci-nix-build.sh`
+- `scripts/summarize-nixos-test-log.mjs` synthetic startup-trace sample
+- `nix eval --accept-flake-config --raw .#checks.x86_64-linux.hm-activation.drvPath`
+- `nix eval --accept-flake-config --raw .#checks.x86_64-linux.ci.drvPath`
+- `RUNNER_TEMP=/tmp NIX_METER_BUILD_CLOSURE=0 scripts/ci-nix-build.sh local-darwin-ci-startup-trace-summary --accept-flake-config --option max-jobs 2 --no-link .#checks.aarch64-darwin.ci`
+
+Remote proof for measured commit:
+
+- GitHub Actions run: `27057741355`, success, `pull_request`, head
+  `fd4ff99472356b610bf04a1d0bfc46b7fe27583f`.
+- Linux job `2m18s`; aggregate step `122s`; wrapper `118s`; timing step `6s`;
+  `924` planned fetched paths; `928` copied paths; `26` planned/built
+  derivations.
+- Linux timing summary included `43` gateway startup trace events and the top
+  spans listed above.
+- macOS job `1m45s`; Darwin aggregate step `65s`; HM activation parsed step
+  `1.50s`.
 - PR merge state after the run: `CLEAN`.
 - Garnix checks remained green on the same head.
 
