@@ -706,6 +706,13 @@ Remote proof:
 | `openclaw` closure | prior optimized graph `6e87b41a`/`6197f2f2` equivalent | 1,846,536,320 B | `6ce39fb6` `openclaw` path above | 1,846,536,320 B | unchanged | `nix path-info -S "$openclaw"` |
 | Gateway package manifests | prior optimized graph | 584 | `6ce39fb6` gateway path above | 584 | unchanged | `find "$gateway/lib/openclaw" -name package.json \| wc -l` |
 | Files under `lib/openclaw` | prior optimized graph | 34,054 | `6ce39fb6` gateway path above | 34,054 | unchanged | `find "$gateway/lib/openclaw" -type f \| wc -l` |
+| Remote GitHub workflow wall time | `27048974295` at `6197f2f2` | 166s | `27049891158` at docs commit `72936ff2`, graph commit `6ce39fb6` | 160s | 3.6% faster, cache-influenced | `gh run view <run> --json createdAt,updatedAt` |
+| Remote Linux job duration | `27048974295` | 141s | `27049891158` | 146s | 3.5% slower | `gh run view <run> --json jobs` |
+| Remote Linux aggregate | `27048974295` | 130s, 932 fetched paths, 1.2 GiB download, 29 built drvs | `27049891158` | 136s, 929 fetched paths, 1.2 GiB download, 31 built drvs | 4.6% slower; two tiny generated config drvs are now tracked | `scripts/summarize-nix-build-log.mjs --github-log /tmp/nix-openclaw-ci-logs/run-<run>.log` |
+| Remote macOS job duration | `27048974295` | 163s | `27049891158` | 155s | 4.9% faster | `gh run view <run> --json jobs` |
+| Remote Darwin aggregate | `27048974295` | 93s, 227 fetched paths, 286 MiB download, 0 built drvs, 5 warnings | `27049891158` | 88s, 226 fetched paths, 286 MiB download, 0 built drvs, 2 warnings | 5.4% faster, 60.0% fewer warnings | parser command above |
+| Remote macOS HM activation | `27048974295` | 20s, 3 warnings | `27049891158` | 17s, 1 warning | 15.0% faster, 66.7% fewer warnings | parser command above |
+| Remote macOS warning lines, aggregate plus HM activation | `27048974295` | 8 | `27049891158` | 3 | 62.5% fewer | parser command above |
 
 Rejected simplification:
 
@@ -729,7 +736,20 @@ Local proof for measured code commit:
 
 Remote proof:
 
-- Pending; run after pushing this audit commit.
+- Garnix on PR head `72936ff2383d31c0d0ef029acb36e2a44d6b6358`,
+  success, `2026-06-06T02:14:51Z` to `2026-06-06T02:16:19Z`:
+  flake evaluation `23s`, Darwin `ci` `55s`, selected package targets `5s`
+  to `17s`.
+- GitHub Actions did not create a `pull_request` run after pushing
+  `72936ff2383d31c0d0ef029acb36e2a44d6b6358`; manually dispatched
+  `27049891158` on `codex/npm-shrinkwrap-default`, success,
+  `2026-06-06T02:19:29Z` to `2026-06-06T02:22:09Z`.
+- GitHub Actions jobs for `27049891158`: Linux `2m26s`, macOS `2m35s`.
+  Because `72936ff2383d31c0d0ef029acb36e2a44d6b6358` is this audit-only
+  documentation commit, the measured package/check graph is the
+  `6ce39fb68fca65f092d13ecf9d1b7a267fe1bbd0` graph.
+- PR `mergeStateStatus` reported `DIRTY` after the successful remote checks;
+  resolve the stack/base state separately before merge.
 
 ## Add A Run
 
