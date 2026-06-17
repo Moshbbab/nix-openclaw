@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 8c802aa683510c7f7503597b54c3021733245e59. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 844f405ac1be805d5c598922a37254f12ab6d765. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -6006,6 +6006,10 @@ in
     }; });
       default = null;
     };
+    usageTemplate = lib.mkOption {
+      type = t.nullOr (t.oneOf [ (t.str) (t.attrsOf (t.anything)) ]);
+      default = null;
+    };
     visibleReplies = lib.mkOption {
       type = t.nullOr (t.oneOf [ (t.enum [ "automatic" "message_tool" ]) (t.bool) ]);
       default = null;
@@ -7465,6 +7469,10 @@ in
     };
     workshop = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
+      allowSymlinkTargetWrites = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
       approvalPolicy = lib.mkOption {
         type = t.nullOr (t.oneOf [ (t.enum [ "pending" ]) (t.enum [ "auto" ]) ]);
         default = null;
@@ -10926,7 +10934,7 @@ in
         default = null;
       };
       mode = lib.mkOption {
-        type = t.nullOr (t.enum [ "code" "tools" ]);
+        type = t.nullOr (t.enum [ "code" "tools" "directory" ]);
         default = null;
       };
       searchDefaultLimit = lib.mkOption {

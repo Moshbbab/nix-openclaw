@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/zalouser";
-  version = "2026.6.6";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/zalouser/-/zalouser-2026.6.6.tgz";
-  npmIntegrity = "sha512-ed6zHxXhDBPoqZE+zLFc+wYC7nslNVwHY9tXQfuNmW8SBCn30gbdGj4GwfIOQZfX0UQvFufGdlIPB0S4eBBHAw==";
-  npmShasum = "2b3263aaf04f869a6836b1c6920b12caeb15c6a5";
-  nixHash = "sha256-9plxN+knV9z/0a8mINBpF6BPgfoMijf8qGSowyB1B5M=";
+  version = "2026.6.8";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/zalouser/-/zalouser-2026.6.8.tgz";
+  npmIntegrity = "sha512-PBJqVLJzPidtMOfa6wUEBKC7moYohJvT888S9OYPUqZHGpHTUoQV6w22XQfuw3ddA7GJUBgRCFWTQWe8mr9NaQ==";
+  npmShasum = "2db1bf7d27668d819582b9e21d88c7e6973b6c78";
+  nixHash = "sha256-2SToRMImjzF7TgEUL/Y4H4x4iNCqjE6rpFEAVXW40P8=";
   dependencyMode = "bundled";
   manifestId = "zalouser";
-  openclawCompat = ">=2026.6.6";
-  peerOpenClaw = ">=2026.6.6";
+  openclawCompat = ">=2026.6.8";
+  peerOpenClaw = ">=2026.6.8";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -62,7 +62,6 @@
     "node_modules/get-intrinsic"
     "node_modules/get-proto"
     "node_modules/gopd"
-    "node_modules/has-own"
     "node_modules/has-symbols"
     "node_modules/has-tostringtag"
     "node_modules/hasown"

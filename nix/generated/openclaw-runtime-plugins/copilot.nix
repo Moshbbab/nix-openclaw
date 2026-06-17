@@ -13,16 +13,16 @@
   minHostVersion = ">=2026.5.28";
   expectedIntegrity = "";
   packageName = "@openclaw/copilot";
-  version = "2026.6.6";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/copilot/-/copilot-2026.6.6.tgz";
-  npmIntegrity = "sha512-Y9kDd4FbCM5RqsnK9JDmD1SleG9OR2F37vU4+bWTR4xuXv5jnpKrhoWDLBsyqjZd4ILR2rDCEmfdWT95S86bnw==";
-  npmShasum = "6be7d20dc8686674bad64c3c7476da3a5918c25e";
-  nixHash = "sha256-Bt3VUrvqW5F/ndykC1RRrooPfLd37xMxiUqwnc/IFXM=";
+  version = "2026.6.8";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/copilot/-/copilot-2026.6.8.tgz";
+  npmIntegrity = "sha512-jJDTyTlTN+IrZ7Ob8MeDisxo3wlxG5ISL5yLxGKYx+oUYs97iW5E2WnBpDqy1dd71dmLncUIFAbzi5987v65Og==";
+  npmShasum = "6df691e04bdb0132ed030565540c0bff4cc7e57d";
+  nixHash = "sha256-zTaTuZpY3gHy5zkQfzR01/82ISaX8Z4A+Im1IVMrb4U=";
   dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-3ywQjrl4kZKbjrz5/r8FhS5krVrnzVOaI19UXnHFwXM=";
+  npmDepsHash = "sha256-xxaHbTq5cqMv6C76GPQns/+sUoQ8XKDiUVUDiPm72HQ=";
   manifestId = "copilot";
-  openclawCompat = ">=2026.6.6";
-  peerOpenClaw = ">=2026.6.6";
+  openclawCompat = ">=2026.6.8";
+  peerOpenClaw = ">=2026.6.8";
   runtimeExtensions = [
     "./dist/index.js"
   ];

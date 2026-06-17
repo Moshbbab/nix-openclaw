@@ -98,6 +98,7 @@ jobs:
           while IFS= read -r file; do
             pin_files+=("$file")
           done < <(scripts/update-pins.sh files)
+          git add --intent-to-add -- "${pin_files[@]}"
           digest="$(
             git diff --binary -- "${pin_files[@]}" \
               | shasum -a 256 \
@@ -107,13 +108,13 @@ jobs:
 
       - name: Verify flake.lock owners
         id: owners
-        if: steps.materialize.outcome == 'success'
+        if: steps.materialize.outcome == 'success' && steps.materialization.outcome == 'success'
         continue-on-error: true
         run: scripts/check-flake-lock-owners.sh
 
       - name: Validate Linux supported surface
         id: supported_surface
-        if: steps.materialize.outcome == 'success' && steps.owners.outcome == 'success'
+        if: steps.materialize.outcome == 'success' && steps.materialization.outcome == 'success' && steps.owners.outcome == 'success'
         continue-on-error: true
         run: |
           timeout --foreground 50m maintainers/scripts/ci-nix-build.sh linux-supported-surface \
@@ -145,11 +146,13 @@ jobs:
             echo "### Linux validation did not pass"
             echo
             echo "- Materialize: \`${{ steps.materialize.outcome }}\`"
+            echo "- Materialized diff digest: \`${{ steps.materialization.outcome }}\`"
             echo "- flake.lock owners: \`${{ steps.owners.outcome }}\`"
             echo "- Supported surface: \`${{ steps.supported_surface.outcome }}\`"
             echo
             echo "Promotion skipped; pinned source remains unchanged."
           } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
   validate-macos:
     needs: select
@@ -187,6 +190,7 @@ jobs:
           while IFS= read -r file; do
             pin_files+=("$file")
           done < <(scripts/update-pins.sh files)
+          git add --intent-to-add -- "${pin_files[@]}"
           digest="$(
             git diff --binary -- "${pin_files[@]}" \
               | shasum -a 256 \
@@ -196,7 +200,7 @@ jobs:
 
       - name: Validate macOS supported surface
         id: supported_surface
-        if: steps.materialize.outcome == 'success'
+        if: steps.materialize.outcome == 'success' && steps.materialization.outcome == 'success'
         continue-on-error: true
         timeout-minutes: 45
         run: |
@@ -213,7 +217,7 @@ jobs:
 
       - name: Run HM activation
         id: hm
-        if: steps.materialize.outcome == 'success' && steps.supported_surface.outcome == 'success'
+        if: steps.materialize.outcome == 'success' && steps.materialization.outcome == 'success' && steps.supported_surface.outcome == 'success'
         continue-on-error: true
         timeout-minutes: 10
         run: |
@@ -239,11 +243,13 @@ jobs:
             echo "### macOS validation did not pass"
             echo
             echo "- Materialize: \`${{ steps.materialize.outcome }}\`"
+            echo "- Materialized diff digest: \`${{ steps.materialization.outcome }}\`"
             echo "- Supported surface: \`${{ steps.supported_surface.outcome }}\`"
             echo "- HM activation: \`${{ steps.hm.outcome }}\`"
             echo
             echo "Promotion skipped; pinned source remains unchanged."
           } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
 
   promote:
     needs:
@@ -301,6 +307,7 @@ jobs:
           while IFS= read -r file; do
             pin_files+=("$file")
           done < <(scripts/update-pins.sh files)
+          git add --intent-to-add -- "${pin_files[@]}"
 
           if git diff --quiet -- "${pin_files[@]}"; then
             echo "No pin changes detected."

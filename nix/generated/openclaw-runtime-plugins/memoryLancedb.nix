@@ -13,16 +13,16 @@
   minHostVersion = ">=2026.5.31";
   expectedIntegrity = "";
   packageName = "@openclaw/memory-lancedb";
-  version = "2026.6.6";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/memory-lancedb/-/memory-lancedb-2026.6.6.tgz";
-  npmIntegrity = "sha512-6dnAdrTIkZ0Kf6Jx8KE0HEBft58tTe93O6OmredEmenHJgtO+cqoYhueTveR61YyaW1l3vMnEH8e23IqhEuy5g==";
-  npmShasum = "707240290b460cf6f539b4ac908af0e75710c48b";
-  nixHash = "sha256-Gw85yUwPLfAcq3iSMI/VvWTGpdm6umX3cXYtnDq5fFg=";
+  version = "2026.6.8";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/memory-lancedb/-/memory-lancedb-2026.6.8.tgz";
+  npmIntegrity = "sha512-88mnrRS5qX52f7+f3vvERb97yS5b9T+tftNgJGdiwZSNoMUxOKGV1ttqY3aLEKnz+xo5ZAYWpc/i4htMpNZKmg==";
+  npmShasum = "65962f00f4828646cb3c4ed073941b95fae0f0c7";
+  nixHash = "sha256-Uq0B/IlbCF92T/nMh7fYFNRjI9fatkk7kBQUqkoRbjA=";
   dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-T2PfvQp1IeKZp4Uqn3etmMuBXuIGpIY5QnswszuHkNc=";
+  npmDepsHash = "sha256-K7rtVKjO1KHxmITBEXM5ZXJVIsrNccxmCSpXO0oMYv4=";
   manifestId = "memory-lancedb";
-  openclawCompat = ">=2026.6.6";
-  peerOpenClaw = ">=2026.6.6";
+  openclawCompat = ">=2026.6.8";
+  peerOpenClaw = ">=2026.6.8";
   runtimeExtensions = [
     "./dist/index.js"
   ];

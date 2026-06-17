@@ -18,6 +18,7 @@
   line = import ./line.nix;
   llama-cpp = import ./llamaCpp.nix;
   lobster = import ./lobster.nix;
+  matrix = import ./matrix.nix;
   memory-lancedb = import ./memoryLancedb.nix;
   msteams = import ./msteams.nix;
   nextcloud-talk = import ./nextcloudTalk.nix;
@@ -31,6 +32,7 @@
   tokenjuice = import ./tokenjuice.nix;
   twitch = import ./twitch.nix;
   voice-call = import ./voiceCall.nix;
+  whatsapp = import ./whatsapp.nix;
   zalo = import ./zalo.nix;
   zalouser = import ./zalouser.nix;
 }
