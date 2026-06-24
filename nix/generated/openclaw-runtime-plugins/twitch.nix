@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/twitch";
-  version = "2026.6.9";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/twitch/-/twitch-2026.6.9.tgz";
-  npmIntegrity = "sha512-pSuyIyaDVNxsbTiC2JgZmNzuVoz6wPyy4WAEEFk4qDkq2t3bq5EFf6lRi86mEx+5jXH/+apjW5t1EeN8w/71LA==";
-  npmShasum = "6fdfe1bfa1ebf64f218ab81e8098b4e56962097b";
-  nixHash = "sha256-GScZj0leabhDLW+HfwEM4bIl5hfwOzt0KaAPD90900s=";
+  version = "2026.6.10";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/twitch/-/twitch-2026.6.10.tgz";
+  npmIntegrity = "sha512-dpFB1JrdBvrCBi39ELfAR96MG026RcD6D74ENdqZLGwtMNxE1CZOcekX/LcT3qEKgLy1Z17jXKJzwJ0U4DcLVA==";
+  npmShasum = "4661a07dfb048918fe291138fe68d7420dad873c";
+  nixHash = "sha256-6kTud+GwcJVfprIqp2Vc18QA1EqRtxXDlnMvJBLEm+E=";
   dependencyMode = "bundled";
   manifestId = "twitch";
-  openclawCompat = ">=2026.6.9";
-  peerOpenClaw = ">=2026.6.9";
+  openclawCompat = ">=2026.6.10";
+  peerOpenClaw = ">=2026.6.10";
   runtimeExtensions = [
     "./dist/index.js"
   ];

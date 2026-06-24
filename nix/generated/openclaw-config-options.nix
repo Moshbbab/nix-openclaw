@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev c645ec4555c017931de0e35ad9847dffae2741ef. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev aa69b12d0086b631b139c1435c9621a5783e3a40. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -1789,7 +1789,7 @@ in
         default = null;
       };
       fastModeDefault = lib.mkOption {
-        type = t.nullOr (t.bool);
+        type = t.nullOr (t.oneOf [ (t.bool) (t.enum [ "auto" ]) ]);
         default = null;
       };
       groupChat = lib.mkOption {

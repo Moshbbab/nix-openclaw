@@ -13,16 +13,16 @@
   minHostVersion = ">=2026.6.2";
   expectedIntegrity = "";
   packageName = "@openclaw/llama-cpp-provider";
-  version = "2026.6.9";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/llama-cpp-provider/-/llama-cpp-provider-2026.6.9.tgz";
-  npmIntegrity = "sha512-1tQnkprQs9T7R2dFwRSZcoNUfMcSTIaOFxwr2q5DFnA9l8WCLLav/6XRPzvaqwXiiqc+i0+tCr4a9uqonFt29A==";
-  npmShasum = "2b5f4c74599dd25346c21c512f8348e0a86961a1";
-  nixHash = "sha256-Pg7SqEm0auHeD9DGM7MPd15mrl+vmkzH1lkAt/NXoB0=";
+  version = "2026.6.10";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/llama-cpp-provider/-/llama-cpp-provider-2026.6.10.tgz";
+  npmIntegrity = "sha512-DPGEz5WL8Jnej8nGaZKaBT8BThn4jsOKm1m6RP9Z3AurpNDmrHO6zKt3NCuqjCaos/NRnASvZFB0AcB0EXjBnA==";
+  npmShasum = "78dc965891c0355c985c19e6f37894f7cfbd5ea2";
+  nixHash = "sha256-IQm8vDBUVIrJ/7+1/wf8NEIumZlRMgPPaUFW4tamTWU=";
   dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-4PC7hydDykSzui3VM/TYWK7wA9eSLwTbItc3xESM5NU=";
+  npmDepsHash = "sha256-jneplUINOIOXvwdnyHGseCRtxutn4Mi5TFA8nfYiMcg=";
   manifestId = "llama-cpp";
-  openclawCompat = ">=2026.6.9";
-  peerOpenClaw = ">=2026.6.9";
+  openclawCompat = ">=2026.6.10";
+  peerOpenClaw = ">=2026.6.10";
   runtimeExtensions = [
     "./dist/index.js"
   ];
