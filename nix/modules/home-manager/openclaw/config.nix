@@ -300,6 +300,7 @@ let
       package = gatewayRuntimePackage;
     in
     {
+      name = name;
       homeFile = {
         name = openclawLib.toRelative inst.configPath;
         value = {
@@ -380,6 +381,8 @@ let
       assertions = runtimePluginConfig.assertions ++ bootstrapAssertions;
       launchdLabel =
         if pkgs.stdenv.hostPlatform.isDarwin && inst.launchd.enable then inst.launchd.label else null;
+      systemdUnitName =
+        if pkgs.stdenv.hostPlatform.isLinux && inst.systemd.enable then inst.systemd.unitName else null;
     };
 
   instanceConfigs = lib.mapAttrsToList mkInstanceConfig enabledInstances;
@@ -401,6 +404,47 @@ let
   appInstalls = lib.filter (item: item != null) (map (item: item.appInstall) instanceConfigs);
   launchdLabels = lib.filter (label: label != null) (map (item: item.launchdLabel) instanceConfigs);
   launchdLabelArgs = lib.concatStringsSep " " (map lib.escapeShellArg launchdLabels);
+  systemdUnitNames = lib.filter (unitName: unitName != null) (
+    map (item: item.systemdUnitName) instanceConfigs
+  );
+  reloadTargetsByName =
+    targetAttr:
+    lib.listToAttrs (
+      map (item: {
+        name = item.name;
+        value = item.${targetAttr};
+      }) (lib.filter (item: item.${targetAttr} != null) instanceConfigs)
+    );
+  launchdLabelsByName = reloadTargetsByName "launchdLabel";
+  systemdUnitNamesByName = reloadTargetsByName "systemdUnitName";
+  reloadTargetsForName =
+    targetsByName: targetName:
+    if builtins.hasAttr targetName targetsByName then
+      [ targetsByName.${targetName} ]
+    else if builtins.hasAttr "default" targetsByName then
+      [ targetsByName.default ]
+    else
+      [ ];
+  reloadShellArray = values: lib.concatStringsSep " " (map lib.escapeShellArg values);
+  reloadScriptText =
+    builtins.replaceStrings
+      [
+        "@openclawReloadTestLaunchdLabels@"
+        "@openclawReloadTestSystemdUnits@"
+        "@openclawReloadProdLaunchdLabels@"
+        "@openclawReloadProdSystemdUnits@"
+        "@openclawReloadBothLaunchdLabels@"
+        "@openclawReloadBothSystemdUnits@"
+      ]
+      [
+        (reloadShellArray (reloadTargetsForName launchdLabelsByName "test"))
+        (reloadShellArray (reloadTargetsForName systemdUnitNamesByName "test"))
+        (reloadShellArray (reloadTargetsForName launchdLabelsByName "prod"))
+        (reloadShellArray (reloadTargetsForName systemdUnitNamesByName "prod"))
+        (reloadShellArray launchdLabels)
+        (reloadShellArray systemdUnitNames)
+      ]
+      (builtins.readFile ../openclaw-reload.sh);
   runtimePluginPackagesAll = lib.unique (
     lib.flatten (map (item: item.runtimePluginPackages) instanceConfigs)
   );
@@ -452,7 +496,7 @@ in
       (lib.optionalAttrs cfg.reloadScript.enable {
         ".local/bin/openclaw-reload" = {
           executable = true;
-          source = ../openclaw-reload.sh;
+          text = reloadScriptText;
         };
       })
     ];

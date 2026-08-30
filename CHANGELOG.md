@@ -8,6 +8,14 @@ This changelog starts with the current pre-1.0 nix-openclaw Home Manager module
 API transition.
 Older repository history is available in git.
 
+## 2026-08-30
+
+### Fixed
+
+- `openclaw-reload` now restarts the configured Home Manager launchd labels or
+  systemd user units instead of the old hardcoded `.nix` and `.nix-test`
+  labels.
+
 ## 2026-06-06
 
 ### Changed

@@ -170,6 +170,139 @@ let
       "ok"
   );
 
+  reloadHelperText =
+    eval:
+    let
+      file = eval.config.home.file.".local/bin/openclaw-reload" or { };
+    in
+    if file ? text then file.text else throw "openclaw-reload helper was not installed.";
+
+  reloadHasLine = text: line: lib.hasInfix line text;
+
+  reloadDefaultEval = moduleEval {
+    reloadScript.enable = true;
+  };
+  reloadDefaultText = reloadHelperText reloadDefaultEval;
+  reloadDefaultCheck =
+    builtins.deepSeq (requireNoAssertionFailures "reload default targets" reloadDefaultEval)
+      (
+        if reloadHasLine reloadDefaultText "com.steipete.openclaw.gateway.nix" then
+          throw "Default reload helper still hardcodes .nix launchd labels."
+        else if pkgs.stdenv.hostPlatform.isDarwin then
+          if
+            !(reloadHasLine reloadDefaultText "  test)\n    launchd_labels=(com.steipete.openclaw.gateway)")
+          then
+            throw "Default reload helper test target missing module default launchd label."
+          else if
+            !(reloadHasLine reloadDefaultText "  prod)\n    launchd_labels=(com.steipete.openclaw.gateway)")
+          then
+            throw "Default reload helper prod target missing module default launchd label."
+          else if
+            !(reloadHasLine reloadDefaultText "  both)\n    launchd_labels=(com.steipete.openclaw.gateway)")
+          then
+            throw "Default reload helper both target missing module default launchd label."
+          else
+            "ok"
+        else if pkgs.stdenv.hostPlatform.isLinux then
+          if
+            !(reloadHasLine reloadDefaultText "  test)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway)")
+          then
+            throw "Default reload helper test target missing module default systemd unit."
+          else if
+            !(reloadHasLine reloadDefaultText "  prod)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway)")
+          then
+            throw "Default reload helper prod target missing module default systemd unit."
+          else if
+            !(reloadHasLine reloadDefaultText "  both)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway)")
+          then
+            throw "Default reload helper both target missing module default systemd unit."
+          else
+            "ok"
+        else
+          "ok"
+      );
+
+  reloadNamedEval = moduleEval {
+    reloadScript.enable = true;
+    instances.prod.enable = true;
+    instances.test.enable = true;
+  };
+  reloadNamedText = reloadHelperText reloadNamedEval;
+  reloadNamedCheck =
+    builtins.deepSeq (requireNoAssertionFailures "reload named targets" reloadNamedEval)
+      (
+        if reloadHasLine reloadNamedText "com.steipete.openclaw.gateway.nix" then
+          throw "Named reload helper still hardcodes .nix launchd labels."
+        else if pkgs.stdenv.hostPlatform.isDarwin then
+          if
+            !(reloadHasLine reloadNamedText "  test)\n    launchd_labels=(com.steipete.openclaw.gateway.test)")
+          then
+            throw "Named reload helper test target missing test instance launchd label."
+          else if
+            !(reloadHasLine reloadNamedText "  prod)\n    launchd_labels=(com.steipete.openclaw.gateway.prod)")
+          then
+            throw "Named reload helper prod target missing prod instance launchd label."
+          else if
+            !(reloadHasLine reloadNamedText "  both)\n    launchd_labels=(com.steipete.openclaw.gateway.prod com.steipete.openclaw.gateway.test)")
+          then
+            throw "Named reload helper both target missing configured launchd labels."
+          else
+            "ok"
+        else if pkgs.stdenv.hostPlatform.isLinux then
+          if
+            !(reloadHasLine reloadNamedText "  test)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway-test)")
+          then
+            throw "Named reload helper test target missing test instance systemd unit."
+          else if
+            !(reloadHasLine reloadNamedText "  prod)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway-prod)")
+          then
+            throw "Named reload helper prod target missing prod instance systemd unit."
+          else if
+            !(reloadHasLine reloadNamedText "  both)\n    launchd_labels=()\n    systemd_units=(openclaw-gateway-prod openclaw-gateway-test)")
+          then
+            throw "Named reload helper both target missing configured systemd units."
+          else
+            "ok"
+        else
+          "ok"
+      );
+
+  reloadCustomDefaultEval = moduleEval {
+    reloadScript.enable = true;
+    launchd.label = "com.example.openclaw.gateway";
+    systemd.unitName = "openclaw-example";
+  };
+  reloadCustomDefaultText = reloadHelperText reloadCustomDefaultEval;
+  reloadCustomDefaultCheck =
+    builtins.deepSeq
+      (requireNoAssertionFailures "reload custom default targets" reloadCustomDefaultEval)
+      (
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          if
+            !(reloadHasLine reloadCustomDefaultText "  test)\n    launchd_labels=(com.example.openclaw.gateway)")
+          then
+            throw "Custom default reload helper test target did not use programs.openclaw.launchd.label."
+          else if
+            !(reloadHasLine reloadCustomDefaultText "  prod)\n    launchd_labels=(com.example.openclaw.gateway)")
+          then
+            throw "Custom default reload helper prod target did not use programs.openclaw.launchd.label."
+          else
+            "ok"
+        else if pkgs.stdenv.hostPlatform.isLinux then
+          if
+            !(reloadHasLine reloadCustomDefaultText "  test)\n    launchd_labels=()\n    systemd_units=(openclaw-example)")
+          then
+            throw "Custom default reload helper test target did not use programs.openclaw.systemd.unitName."
+          else if
+            !(reloadHasLine reloadCustomDefaultText "  prod)\n    launchd_labels=()\n    systemd_units=(openclaw-example)")
+          then
+            throw "Custom default reload helper prod target did not use programs.openclaw.systemd.unitName."
+          else
+            "ok"
+        else
+          "ok"
+      );
+
   sourceOverrideEval = moduleEval {
     instances.dev = {
       enable = true;
@@ -847,6 +980,9 @@ let
   checkKey = builtins.deepSeq (
     [
       defaultCheck
+      reloadDefaultCheck
+      reloadNamedCheck
+      reloadCustomDefaultCheck
       userSkillCheck
       workspaceBootstrapCheck
       documentsRemovedCheck
