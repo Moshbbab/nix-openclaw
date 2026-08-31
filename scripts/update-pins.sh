@@ -107,6 +107,23 @@ refresh_runtime_plugin_locks() {
     node "$repo_root/nix/scripts/update-openclaw-runtime-plugin-locks.mjs"
 }
 
+validate_runtime_plugin_locks() {
+  local locks_json
+  locks_json=$(mktemp)
+  if ! nix --extra-experimental-features "nix-command flakes" eval --json --impure --expr "import ${runtime_plugin_lock_dir}/default.nix" >"$locks_json"; then
+    rm -f "$locks_json"
+    return 1
+  fi
+  if ! OPENCLAW_RUNTIME_PLUGIN_LOCK_DIR="$runtime_plugin_lock_dir" \
+    OPENCLAW_RUNTIME_PLUGIN_LOCKS_JSON="$locks_json" \
+    OPENCLAW_SOURCE_INFO_PATH="$source_file" \
+    node "$repo_root/nix/scripts/check-openclaw-runtime-plugin-locks.mjs"; then
+    rm -f "$locks_json"
+    return 1
+  fi
+  rm -f "$locks_json"
+}
+
 refresh_npm_hash() {
   local attr="$1"
   local setter="$2"
@@ -176,7 +193,7 @@ unpacked_zip_hash() {
     return 1
   fi
 
-  app_list=$(find "$unpack_dir" -maxdepth 3 -type d -name '*.app' -print)
+  app_list=$(find "$unpack_dir" -maxdepth 3 -type d -name '*.app' ! -path "$unpack_dir/__MACOSX/*" -print)
   app_count=$(printf '%s\n' "$app_list" | sed '/^$/d' | wc -l | tr -d ' ')
   if [[ "$app_count" != "1" ]]; then
     fail_zip "Expected exactly one .app in app archive; found $app_count"
@@ -209,7 +226,7 @@ source_pnpm_major() {
   major="${BASH_REMATCH[1]}"
 
   case "$major" in
-    10 | 11) printf '%s\n' "$major" ;;
+    10 | 11 | 12) printf '%s\n' "$major" ;;
     *)
       echo "Unsupported OpenClaw pnpm major $major from $package_manager" >&2
       return 1
@@ -228,6 +245,7 @@ pnpm_shell_package() {
   case "$major" in
     10) printf '%s\n' "nixpkgs#pnpm_10" ;;
     11) printf '%s\n' "$repo_root#pnpm_11" ;;
+    12) printf '%s\n' "$repo_root#pnpm_12" ;;
     *)
       echo "Unsupported OpenClaw pnpm major $major" >&2
       return 1
@@ -458,6 +476,7 @@ apply_release() {
 
   refresh_npm_wrapper_locks "$source_version"
   refresh_runtime_plugin_locks
+  validate_runtime_plugin_locks
   refresh_npm_hash "openclaw-gateway" set_gateway_npm_deps_hash "OpenClaw gateway"
   regenerate_config_options "$selected_sha" "$source_store_path" "$selected_pnpm_major"
 

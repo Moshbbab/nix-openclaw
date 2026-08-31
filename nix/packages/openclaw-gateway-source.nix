@@ -6,6 +6,7 @@
   nodejs_22,
   pnpm_10,
   pnpm_11,
+  pnpm_12,
   fetchPnpmDeps,
   pkg-config,
   jq,
@@ -35,6 +36,7 @@ let
           nodejs_22
           pnpm_10
           pnpm_11
+          pnpm_12
           fetchPnpmDeps
           pkg-config
           jq

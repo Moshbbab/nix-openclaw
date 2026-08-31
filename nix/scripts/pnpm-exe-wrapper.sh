@@ -12,4 +12,4 @@ esac
 export PNPM_CONFIG_PM_ON_FAIL="${PNPM_CONFIG_PM_ON_FAIL:-ignore}"
 export PNPM_CONFIG_MANAGE_PACKAGE_MANAGER_VERSIONS="${PNPM_CONFIG_MANAGE_PACKAGE_MANAGER_VERSIONS:-false}"
 
-exec @node@ @entrypoint@ "$@"
+exec @entrypoint@ "$@"

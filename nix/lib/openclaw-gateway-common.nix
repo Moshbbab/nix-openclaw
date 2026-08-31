@@ -6,6 +6,7 @@
   nodejs_22,
   pnpm_10,
   pnpm_11,
+  pnpm_12,
   fetchPnpmDeps,
   pkg-config,
   jq,
@@ -73,8 +74,13 @@ let
   pnpmByMajor = {
     "10" = pnpm_10;
     "11" = pnpm_11;
+    "12" = pnpm_12;
   };
   selectedPnpm = pnpmByMajor.${pnpmMajor} or (throw "Unsupported OpenClaw pnpm major ${pnpmMajor}");
+  pnpmNeedsVerifiedStore = lib.elem pnpmMajor [
+    "11"
+    "12"
+  ];
 
   pnpmDeps = fetchPnpmDeps {
     pname = pnpmDepsPname;
@@ -82,8 +88,8 @@ let
     src = resolvedSrc;
     pnpm = selectedPnpm;
     hash = if pnpmDepsHash != null then pnpmDepsHash else lib.fakeHash;
-    fetcherVersion = if pnpmMajor == "11" then 4 else 3;
-    preFixup = lib.optionalString (pnpmMajor == "11") ''
+    fetcherVersion = if pnpmNeedsVerifiedStore then 4 else 3;
+    preFixup = lib.optionalString pnpmNeedsVerifiedStore ''
       expectedIntegrities="$(mktemp)"
       actualIntegrities="$(mktemp)"
       missingIntegrities="$(mktemp)"
@@ -100,7 +106,7 @@ let
 
       ${nodejs_22}/bin/node --no-warnings ${../scripts/normalize-pnpm-store-index.js} "$storePath"
     '';
-    postInstall = lib.optionalString (pnpmMajor == "11") ''
+    postInstall = lib.optionalString pnpmNeedsVerifiedStore ''
       verifiedCache="$(find "$HOME" -path '*/lockfile-verified.jsonl' -type f -print -quit)"
       if [ -n "$verifiedCache" ]; then
         jq -c '

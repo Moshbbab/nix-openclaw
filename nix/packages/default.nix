@@ -9,10 +9,18 @@
 let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   pnpm_11 = pkgs.callPackage ./pnpm-11.nix { };
-  pnpmForOpenClaw = if toString (sourceInfo.pnpmMajor or "10") == "11" then pnpm_11 else pkgs.pnpm_10;
+  pnpm_12 = pkgs.callPackage ./pnpm-12.nix { };
+  pnpmByMajor = {
+    "10" = pkgs.pnpm_10;
+    "11" = pnpm_11;
+    "12" = pnpm_12;
+  };
+  pnpmMajor = toString (sourceInfo.pnpmMajor or "10");
+  pnpmForOpenClaw =
+    pnpmByMajor.${pnpmMajor} or (throw "Unsupported OpenClaw pnpm major ${pnpmMajor}");
   toolPkgs = openclawToolPkgs // {
     pnpm = pnpmForOpenClaw;
-    inherit pnpm_11;
+    inherit pnpm_11 pnpm_12;
   };
   toolSets = import ../tools/extended.nix {
     pkgs = pkgs;
@@ -26,7 +34,7 @@ let
   bundledAcpx = buildBundledRuntimePlugin runtimePluginLocks.acpx;
   openclawGateway = pkgs.callPackage ./openclaw-gateway.nix {
     inherit sourceInfo;
-    inherit pnpm_11;
+    inherit pnpm_11 pnpm_12;
     inherit bundledAcpx;
   };
   buildOpenClawRuntimePlugin = pkgs.callPackage ../lib/openclaw-runtime-plugin.nix {
@@ -44,7 +52,7 @@ let
   };
 in
 {
-  inherit pnpm_11;
+  inherit pnpm_11 pnpm_12;
   inherit openclawRuntimePlugins;
   qmd = qmdPackage;
   openclaw-gateway = openclawGateway;

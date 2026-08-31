@@ -37,6 +37,20 @@ function findById(rows, id) {
   return rows.find((row) => row.id === id);
 }
 
+function skippedDetailForId(id) {
+  const row = findById(skipped, id);
+  if (!row) {
+    return "";
+  }
+  return `: skipped as ${row.reason} (${row.detail})`;
+}
+
+function requireSupportedId(id) {
+  const row = findById(supported, id);
+  assert(row, `previously supported id ${id} disappeared${skippedDetailForId(id)}`);
+  return row;
+}
+
 function readNixStringFields(file) {
   const text = fs.readFileSync(file, "utf8");
   return Object.fromEntries(
@@ -194,11 +208,10 @@ for (const row of skipped) {
 }
 
 for (const expected of ["slack", "discord", "brave", "diagnostics-prometheus"]) {
-  assert(findById(supported, expected), `previously supported id ${expected} disappeared`);
+  requireSupportedId(expected);
 }
 
-const acpx = findById(supported, "acpx");
-assert(acpx, "previously supported id acpx disappeared");
+const acpx = requireSupportedId("acpx");
 assert(
   acpx.version === report.runtimePluginVersion,
   `ACPX version ${acpx.version} does not match runtime plugin version ${report.runtimePluginVersion}`,
