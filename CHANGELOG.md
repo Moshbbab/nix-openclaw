@@ -10,8 +10,13 @@ Older repository history is available in git.
 
 ## 2026-09-04
 
+### Changed
+
+- Update the private pnpm 11 and 12 tools to 11.25.0 and 12.3.1, with Linux/macOS checks for offline installs and frozen lockfiles. Keep the existing Node.js 22 runtime and Nixpkgs overlay boundary.
+
 ### Fixed
 
+- Patch the native pnpm 12 Linux executable to use the Nix loader and runtime libraries, so its public package output runs inside the Nix sandbox.
 - Constrain workspace activation cleanup and replacement to configured workspace roots, preserve stale paths from removed or moved instances with a warning, and avoid changing symlink targets or hardlinked file permissions during cleanup. Create home-relative workspace paths containing spaces correctly during activation. Thanks @SebTardif (#119).
 
 ## 2026-08-30
