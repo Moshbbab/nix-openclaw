@@ -502,16 +502,18 @@ in
     ];
 
     home.activation.openclawDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${
-        lib.concatStringsSep " " (lib.concatMap (item: item.dirs) instanceConfigs)
+      run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p -- ${
+        lib.escapeShellArgs (
+          map openclawLib.resolvePath (lib.concatMap (item: item.dirs) instanceConfigs)
+        )
       }
       ${lib.optionalString (plugins.pluginStateDirsAll != [ ])
-        "run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " plugins.pluginStateDirsAll}"
+        "run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p -- ${lib.escapeShellArgs plugins.pluginStateDirsAll}"
       }
     '';
 
     home.activation.openclawWorkspaceFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''
-      run --quiet ${../openclaw-materialize-workspace-files.sh} ${lib.escapeShellArg "${homeDir}/.local/state/nix-openclaw/managed-workspace-files"} ${files.materializedManifest}
+      run --quiet ${../openclaw-materialize-workspace-files.sh} ${lib.escapeShellArg "${homeDir}/.local/state/nix-openclaw/managed-workspace-files"} ${files.materializedManifest} ${files.workspaceRootsManifest}
     '';
 
     home.activation.openclawConfigFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''
