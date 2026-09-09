@@ -24,6 +24,37 @@ let
   appPackage = if cfg.appPackage != null then cfg.appPackage else defaultPackage;
   qmdPackage = pkgs.openclawPackages.qmd or null;
   generatedConfigOptions = import ../../../generated/openclaw-config-options.nix { lib = lib; };
+  agentOptions = generatedConfigOptions.agents.type.getSubOptions [ ];
+  usesAgentEntries = agentOptions ? entries;
+  hasAgentOwnership = agentOptions ? ownership;
+  agentIds =
+    configuration:
+    let
+      agents = configuration.agents or { };
+    in
+    if usesAgentEntries then
+      let
+        keys = lib.attrNames (agents.entries or { });
+        # Only underscore-prefixed valid keys take upstream's trailing-dash fallback.
+        normalized = map (
+          key:
+          lib.toLower (
+            if lib.hasPrefix "_" key then builtins.head (builtins.match "(.*[^-])-*" key) else key
+          )
+        ) keys;
+      in
+      # Generated options omit upstream key patterns; validate before forming paths.
+      if lib.any (key: builtins.match "[a-zA-Z0-9_][a-zA-Z0-9_-]{0,63}" key == null) keys then
+        throw "OpenClaw agents.entries keys must match the upstream agent ID alphabet and 1-64 character limit."
+      else if lib.length (lib.unique normalized) != lib.length normalized then
+        throw "OpenClaw agents.entries keys must be unique after canonical agent ID normalization."
+      else
+        normalized
+    else
+      let
+        configured = lib.filter (id: id != null) (map (agent: agent.id or null) (agents.list or [ ]));
+      in
+      lib.unique ([ "main" ] ++ configured);
   pluginCatalog = import ./plugin-catalog.nix;
 
   bundledPluginSources =
@@ -70,6 +101,9 @@ in
     appPackage
     qmdPackage
     generatedConfigOptions
+    usesAgentEntries
+    hasAgentOwnership
+    agentIds
     bundledPluginSources
     bundledPlugins
     effectivePlugins
