@@ -10,8 +10,11 @@ Older repository history is available in git.
 
 ## Unreleased
 
-**Highlights:** Restore automatic stable updates after runtime plugin removals, preserve Nix-managed skill discovery, and make Home Manager paths and activation consistent. Packaging compatibility for newer OpenClaw releases is ready for pin validation; changes below cover the package state since `v2026.7.1`.
+## 2026.9.4 - 2026-09-11
 
+**Highlights:** Package OpenClaw 2026.9.4 on Linux and macOS, restore automatic stable updates after runtime plugin removals, preserve Nix-managed skill discovery, and make Home Manager paths and activation consistent. Changes below cover the package state since `v2026.7.1`.
+
+- Package upstream OpenClaw `2026.9.4` with its matching macOS app artifact, generated configuration, and reproducible runtime plugin locks.
 - Restore stable pin promotion when an upstream release removes runtime plugins: hash and commit the complete staged update, including deletions, and allow branch validation to prove promotion without publishing; thanks @bastislack (#142).
 - Materialize configured user and plugin skills as per-instance runtime copies, preserving all-agent discovery, extra load paths, and cleanup boundaries; thanks @vsumner (#118).
 - Resolve leading `~/` in instance state, workspace, and config paths consistently for managed files, runtime profiles, and launchd/systemd services, including paths containing spaces and quotes; thanks @SebTardif (#130).

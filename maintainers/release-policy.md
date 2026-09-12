@@ -55,6 +55,11 @@ OpenClaw release so users can click through from the Nix package state to the
 source release. New annotated tags should include the same upstream release URL
 in the tag message.
 
+Before publishing, move the completed `Unreleased` notes under a dated version
+heading such as `## 2026.9.4 - 2026-09-11` and open a new `Unreleased` section.
+The publisher includes the section matching the pinned source version in the
+GitHub Release body, so later CI runs preserve the packaging notes.
+
 Automation must not move an existing public tag. If a tag is wrong, a maintainer
 decides whether it is still safe to delete/retag immediately or whether to
 publish a corrective follow-up tag instead. If an upstream asset disappears or a
