@@ -7,22 +7,21 @@
   catalogSource = "official";
   catalogFile = "official-external-channel-catalog.json";
   catalogEntryName = "@openclaw/whatsapp";
-  catalogDefaultChoice = "clawhub";
-  selectedSource = "clawhub";
-  clawhubSpec = "clawhub:@openclaw/whatsapp";
+  catalogDefaultChoice = "npm";
+  selectedSource = "npm";
+  npmSpec = "@openclaw/whatsapp";
   minHostVersion = ">=2026.4.25";
   expectedIntegrity = "";
   packageName = "@openclaw/whatsapp";
-  version = "2026.7.1";
-  tarballUrl = "https://clawhub.ai/api/npm/@openclaw/whatsapp/-/openclaw-whatsapp-2026.7.1.tgz";
-  npmIntegrity = "sha512-oymPNeprQ3jBL89aima9ou0Dfj185JTVF9ic2ccX+ho3dHXALP9TADZpgx3q41JAr8CUlFyfc/a+9MFeYEn7ZQ==";
-  npmShasum = "1dbd5ad7a1cb623a89478196bcbd24e593cb81d1";
-  nixHash = "sha256-sdm2t01PGNHeXI+RZz6wW+WHXAEm5CwMNFqlUOsAxmM=";
-  dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-5aCJUUkxJ34u1bpIajTgYe56nbg1nCo9L6wJRRjKTK0=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/whatsapp/-/whatsapp-2026.9.4.tgz";
+  npmIntegrity = "sha512-cWXEaRpIArchQfakQQhgw8RAYQQBCtmxHmYidNIgnNwk+JcwTKVAw3CyqjwEbXR95Y+K8t0SWIZB8yoMecBsBg==";
+  npmShasum = "58fa11570766e9910f94786bfb6303adcb110ca4";
+  nixHash = "sha256-oGojbMvvC5kDOsgx6HQ/ekP9lnxRrI9+SjDJ9dBfql0=";
+  dependencyMode = "bundled";
   manifestId = "whatsapp";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -33,18 +32,91 @@
   contracts = {
     tools = [
       "whatsapp_call"
+      "whatsapp_login"
     ];
   };
   dependencies = {
     audio-decode = "2.2.3";
-    baileys = "7.0.0-rc13";
-    typebox = "1.3.3";
+    baileys = "7.0.0-rc14";
+    typebox = "1.3.18";
   };
   optionalDependencies = { };
-  bundleDependencies = [ ];
-  bundledPackageRoots = [ ];
-  clawhubPackageName = "@openclaw/whatsapp";
-  clawhubVersion = "2026.7.1";
-  clawhubArtifactKind = "npm-pack";
-  clawhubArtifactSha256 = "b1d9b6b74d4f18d1de5c8f91673eb05be5875c0126e42c0c345aa550eb00c663";
+  bundleDependencies = [
+    "audio-decode"
+    "baileys"
+    "typebox"
+  ];
+  bundledPackageRoots = [
+    "node_modules/audio-decode"
+    "node_modules/audio-decode/node_modules/@eshaz/web-worker"
+    "node_modules/audio-decode/node_modules/@thi.ng/bitstream"
+    "node_modules/audio-decode/node_modules/@thi.ng/errors"
+    "node_modules/audio-decode/node_modules/@wasm-audio-decoders/common"
+    "node_modules/audio-decode/node_modules/@wasm-audio-decoders/flac"
+    "node_modules/audio-decode/node_modules/@wasm-audio-decoders/ogg-vorbis"
+    "node_modules/audio-decode/node_modules/@wasm-audio-decoders/opus-ml"
+    "node_modules/audio-decode/node_modules/audio-buffer"
+    "node_modules/audio-decode/node_modules/audio-type"
+    "node_modules/audio-decode/node_modules/codec-parser"
+    "node_modules/audio-decode/node_modules/mpg123-decoder"
+    "node_modules/audio-decode/node_modules/node-wav"
+    "node_modules/audio-decode/node_modules/ogg-opus-decoder"
+    "node_modules/audio-decode/node_modules/opus-decoder"
+    "node_modules/audio-decode/node_modules/qoa-format"
+    "node_modules/audio-decode/node_modules/simple-yenc"
+    "node_modules/baileys"
+    "node_modules/baileys/node_modules/@borewit/text-codec"
+    "node_modules/baileys/node_modules/@cacheable/memory"
+    "node_modules/baileys/node_modules/@cacheable/node-cache"
+    "node_modules/baileys/node_modules/@cacheable/utils"
+    "node_modules/baileys/node_modules/@hapi/boom"
+    "node_modules/baileys/node_modules/@hapi/hoek"
+    "node_modules/baileys/node_modules/@keyv/bigmap"
+    "node_modules/baileys/node_modules/@keyv/serialize"
+    "node_modules/baileys/node_modules/@pinojs/redact"
+    "node_modules/baileys/node_modules/@tokenizer/inflate"
+    "node_modules/baileys/node_modules/@tokenizer/token"
+    "node_modules/baileys/node_modules/async-mutex"
+    "node_modules/baileys/node_modules/atomic-sleep"
+    "node_modules/baileys/node_modules/cacheable"
+    "node_modules/baileys/node_modules/content-type"
+    "node_modules/baileys/node_modules/curve25519-js"
+    "node_modules/baileys/node_modules/debug"
+    "node_modules/baileys/node_modules/eventemitter3"
+    "node_modules/baileys/node_modules/file-type"
+    "node_modules/baileys/node_modules/hashery"
+    "node_modules/baileys/node_modules/hookified"
+    "node_modules/baileys/node_modules/ieee754"
+    "node_modules/baileys/node_modules/keyv"
+    "node_modules/baileys/node_modules/libsignal"
+    "node_modules/baileys/node_modules/long"
+    "node_modules/baileys/node_modules/lru-cache"
+    "node_modules/baileys/node_modules/media-typer"
+    "node_modules/baileys/node_modules/ms"
+    "node_modules/baileys/node_modules/music-metadata"
+    "node_modules/baileys/node_modules/on-exit-leak-free"
+    "node_modules/baileys/node_modules/p-queue"
+    "node_modules/baileys/node_modules/p-timeout"
+    "node_modules/baileys/node_modules/pino"
+    "node_modules/baileys/node_modules/pino-abstract-transport"
+    "node_modules/baileys/node_modules/pino-std-serializers"
+    "node_modules/baileys/node_modules/process-warning"
+    "node_modules/baileys/node_modules/protobufjs"
+    "node_modules/baileys/node_modules/qified"
+    "node_modules/baileys/node_modules/qified/node_modules/hookified"
+    "node_modules/baileys/node_modules/quick-format-unescaped"
+    "node_modules/baileys/node_modules/real-require"
+    "node_modules/baileys/node_modules/safe-stable-stringify"
+    "node_modules/baileys/node_modules/sonic-boom"
+    "node_modules/baileys/node_modules/split2"
+    "node_modules/baileys/node_modules/strtok3"
+    "node_modules/baileys/node_modules/thread-stream"
+    "node_modules/baileys/node_modules/token-types"
+    "node_modules/baileys/node_modules/tslib"
+    "node_modules/baileys/node_modules/uint8array-extras"
+    "node_modules/baileys/node_modules/whatsapp-rust-bridge"
+    "node_modules/baileys/node_modules/win-guid"
+    "node_modules/baileys/node_modules/ws"
+    "node_modules/typebox"
+  ];
 }

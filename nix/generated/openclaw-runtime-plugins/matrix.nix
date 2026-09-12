@@ -7,22 +7,21 @@
   catalogSource = "official";
   catalogFile = "official-external-channel-catalog.json";
   catalogEntryName = "@openclaw/matrix";
-  catalogDefaultChoice = "clawhub";
-  selectedSource = "clawhub";
-  clawhubSpec = "clawhub:@openclaw/matrix";
+  catalogDefaultChoice = "npm";
+  selectedSource = "npm";
+  npmSpec = "@openclaw/matrix";
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/matrix";
-  version = "2026.7.1";
-  tarballUrl = "https://clawhub.ai/api/npm/@openclaw/matrix/-/openclaw-matrix-2026.7.1.tgz";
-  npmIntegrity = "sha512-gl5+4iV7tP2vI8eSd1lPp5NfJHM3l+YC5CeUvHdZIDUZDmvjYUR2T9b6SjN4o+XDGcwj5Cvx2ffQcKYMJSjycA==";
-  npmShasum = "2e7c836dd5889524dc5298f771d56c32ca179b35";
-  nixHash = "sha256-STI1yZQU+IQL4TQxip9J3L0/OKhb76DmU1qfHo5oRt0=";
-  dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-Bi7uZSpMwyQeQWbAGRF03uCyvQjAYBPJm7mqKJJ02rc=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/matrix/-/matrix-2026.9.4.tgz";
+  npmIntegrity = "sha512-T+uqRHBmYGqmt1/9MmeBFfo1zAHF4XFyk3XgfsZouZPK5oZrBOLEsoRxqeLjcdee5lK6JiMem5E7AnE0fDFRjA==";
+  npmShasum = "324fea9ee6da48d7e923cc728733e6008290f52a";
+  nixHash = "sha256-4S3vZrfL3gaF6oXIuE+C+nhS94WdTkA4QH62HfeohBw=";
+  dependencyMode = "bundled";
   manifestId = "matrix";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -32,20 +31,72 @@
   ];
   contracts = { };
   dependencies = {
-    "@matrix-org/matrix-sdk-crypto-nodejs" = "0.6.1";
-    "@matrix-org/matrix-sdk-crypto-wasm" = "18.3.1";
+    "@matrix-org/matrix-sdk-crypto-nodejs" = "0.6.6";
+    "@matrix-org/matrix-sdk-crypto-wasm" = "18.7.0";
     fake-indexeddb = "6.2.5";
-    markdown-it = "14.3.0";
-    matrix-js-sdk = "41.9.0-rc.0";
-    music-metadata = "11.13.0";
-    typebox = "1.3.3";
+    markdown-it = "15.0.1";
+    matrix-js-sdk = "42.2.0";
+    music-metadata = "11.15.0";
+    typebox = "1.3.18";
     zod = "4.4.3";
   };
   optionalDependencies = { };
-  bundleDependencies = [ ];
-  bundledPackageRoots = [ ];
-  clawhubPackageName = "@openclaw/matrix";
-  clawhubVersion = "2026.7.1";
-  clawhubArtifactKind = "npm-pack";
-  clawhubArtifactSha256 = "493235c99414f8840be134318a9f49dcbd3f38a85befa0e6535a9f1e8e6846dd";
+  bundleDependencies = [
+    "@matrix-org/matrix-sdk-crypto-nodejs"
+    "@matrix-org/matrix-sdk-crypto-wasm"
+    "fake-indexeddb"
+    "markdown-it"
+    "matrix-js-sdk"
+    "music-metadata"
+    "typebox"
+    "zod"
+  ];
+  bundledPackageRoots = [
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs"
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs/node_modules/agent-base"
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs/node_modules/debug"
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs/node_modules/https-proxy-agent"
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs/node_modules/ms"
+    "node_modules/@matrix-org/matrix-sdk-crypto-nodejs/node_modules/node-downloader-helper"
+    "node_modules/@matrix-org/matrix-sdk-crypto-wasm"
+    "node_modules/fake-indexeddb"
+    "node_modules/markdown-it"
+    "node_modules/markdown-it/node_modules/argparse"
+    "node_modules/markdown-it/node_modules/entities"
+    "node_modules/markdown-it/node_modules/linkify-it"
+    "node_modules/markdown-it/node_modules/mdurl"
+    "node_modules/markdown-it/node_modules/punycode.js"
+    "node_modules/markdown-it/node_modules/uc.micro"
+    "node_modules/matrix-js-sdk"
+    "node_modules/matrix-js-sdk/node_modules/@babel/runtime"
+    "node_modules/matrix-js-sdk/node_modules/@types/events"
+    "node_modules/matrix-js-sdk/node_modules/another-json"
+    "node_modules/matrix-js-sdk/node_modules/base-x"
+    "node_modules/matrix-js-sdk/node_modules/bs58"
+    "node_modules/matrix-js-sdk/node_modules/content-type"
+    "node_modules/matrix-js-sdk/node_modules/events"
+    "node_modules/matrix-js-sdk/node_modules/is-network-error"
+    "node_modules/matrix-js-sdk/node_modules/loglevel"
+    "node_modules/matrix-js-sdk/node_modules/matrix-events-sdk"
+    "node_modules/matrix-js-sdk/node_modules/matrix-widget-api"
+    "node_modules/matrix-js-sdk/node_modules/p-retry"
+    "node_modules/matrix-js-sdk/node_modules/sdp-transform"
+    "node_modules/matrix-js-sdk/node_modules/unhomoglyph"
+    "node_modules/music-metadata"
+    "node_modules/music-metadata/node_modules/@borewit/text-codec"
+    "node_modules/music-metadata/node_modules/@tokenizer/inflate"
+    "node_modules/music-metadata/node_modules/@tokenizer/token"
+    "node_modules/music-metadata/node_modules/content-type"
+    "node_modules/music-metadata/node_modules/debug"
+    "node_modules/music-metadata/node_modules/file-type"
+    "node_modules/music-metadata/node_modules/ieee754"
+    "node_modules/music-metadata/node_modules/media-typer"
+    "node_modules/music-metadata/node_modules/ms"
+    "node_modules/music-metadata/node_modules/strtok3"
+    "node_modules/music-metadata/node_modules/token-types"
+    "node_modules/music-metadata/node_modules/uint8array-extras"
+    "node_modules/music-metadata/node_modules/win-guid"
+    "node_modules/typebox"
+    "node_modules/zod"
+  ];
 }

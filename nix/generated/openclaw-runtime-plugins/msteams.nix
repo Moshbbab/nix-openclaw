@@ -13,177 +13,43 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/msteams";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/msteams/-/msteams-2026.7.1.tgz";
-  npmIntegrity = "sha512-gG/Yk6HZAguHwrmKjsqdONbFz5WNy126PEAXQWNW/TulO1kIifQ6tktM16BQPNLnkmWqLbj+TrrO55Cjas1aFg==";
-  npmShasum = "5f5c6969a0cb48feafd2c4a1f87bebced6561a40";
-  nixHash = "sha256-A/xBgfpSwZgraNI9XDIiHWIW0WIGdaYrmlDQPxTU5FI=";
-  dependencyMode = "bundled";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/msteams/-/msteams-2026.9.4.tgz";
+  npmIntegrity = "sha512-x6Fq1dIGkTjk8CZg6uWot20dQQoYbUsAZymUVXtS7qxkUaPRMYarxpzZVKC5jUUpu1lulffhp5dEx2qxsQB8ZQ==";
+  npmShasum = "eb1b9dbe68f3540d7ed7bb8194f3adb7edd7c581";
+  nixHash = "sha256-9JFry5ue4ze+Y3t25JZLG2x3wbswqKGSo9Mk7rpOFPE=";
+  dependencyMode = "package-lock";
+  npmDepsHash = "sha256-xxKi+gQEdBKDb/kCNDYS8P+GpvP+XXH8NpWZdWbcUR8=";
+  npmPackageLockFile = "msteams.package-lock.json";
+  npmPackageLockSha256 = "654e725c03b8d46b5813e49b60529f9c8a97601743bf27156ff6921f49cb00d9";
+  npmPackageLockEvidence = {
+    assetName = "openclaw-2026.9.4-dependency-evidence.zip";
+    assetUrl = "https://github.com/openclaw/openclaw/releases/download/v2026.9.4/openclaw-2026.9.4-dependency-evidence.zip";
+    assetNixHash = "sha256-rX/GaPQdsuy4yOr6N7CKLb6eTqYDMfVkFFLNgylmAC0=";
+    source = "release";
+    sourceSha = "3a9d69db306cd7f081e06254cb89c4bcc14a7107";
+    generatedAt = "2026-09-10T23:00:16.995Z";
+  };
   manifestId = "msteams";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
-    "./dist/index.js"
+    "./dist/index.cjs"
   ];
-  runtimeSetupEntry = "./dist/setup-entry.js";
+  runtimeSetupEntry = "./dist/setup-entry.cjs";
   channels = [
     "msteams"
   ];
   contracts = { };
   dependencies = {
-    "@azure/identity" = "4.13.1";
-    "@microsoft/teams.api" = "2.0.13";
-    "@microsoft/teams.apps" = "2.0.13";
+    "@azure/identity" = "4.13.2";
+    "@microsoft/teams.api" = "2.0.15";
+    "@microsoft/teams.apps" = "2.0.15";
     express = "5.2.1";
-    typebox = "1.3.3";
+    typebox = "1.3.18";
+    zod = "4.4.3";
   };
   optionalDependencies = { };
-  bundleDependencies = [
-    "@azure/identity"
-    "@microsoft/teams.api"
-    "@microsoft/teams.apps"
-    "express"
-    "typebox"
-  ];
-  bundledPackageRoots = [
-    "node_modules/@azure/abort-controller"
-    "node_modules/@azure/core-auth"
-    "node_modules/@azure/core-client"
-    "node_modules/@azure/core-rest-pipeline"
-    "node_modules/@azure/core-tracing"
-    "node_modules/@azure/core-util"
-    "node_modules/@azure/identity"
-    "node_modules/@azure/logger"
-    "node_modules/@azure/msal-browser"
-    "node_modules/@azure/msal-common"
-    "node_modules/@azure/msal-node"
-    "node_modules/@microsoft/teams.api"
-    "node_modules/@microsoft/teams.apps"
-    "node_modules/@microsoft/teams.cards"
-    "node_modules/@microsoft/teams.common"
-    "node_modules/@microsoft/teams.graph"
-    "node_modules/@types/jsonwebtoken"
-    "node_modules/@types/ms"
-    "node_modules/@types/node"
-    "node_modules/@typespec/ts-http-runtime"
-    "node_modules/accepts"
-    "node_modules/agent-base"
-    "node_modules/asynckit"
-    "node_modules/axios"
-    "node_modules/body-parser"
-    "node_modules/body-parser/node_modules/content-type"
-    "node_modules/buffer-equal-constant-time"
-    "node_modules/bundle-name"
-    "node_modules/bytes"
-    "node_modules/call-bind-apply-helpers"
-    "node_modules/call-bound"
-    "node_modules/combined-stream"
-    "node_modules/content-disposition"
-    "node_modules/content-type"
-    "node_modules/cookie"
-    "node_modules/cookie-signature"
-    "node_modules/cors"
-    "node_modules/debug"
-    "node_modules/default-browser"
-    "node_modules/default-browser-id"
-    "node_modules/define-lazy-prop"
-    "node_modules/delayed-stream"
-    "node_modules/depd"
-    "node_modules/dunder-proto"
-    "node_modules/ecdsa-sig-formatter"
-    "node_modules/ee-first"
-    "node_modules/encodeurl"
-    "node_modules/es-define-property"
-    "node_modules/es-errors"
-    "node_modules/es-object-atoms"
-    "node_modules/es-set-tostringtag"
-    "node_modules/escape-html"
-    "node_modules/etag"
-    "node_modules/express"
-    "node_modules/finalhandler"
-    "node_modules/follow-redirects"
-    "node_modules/form-data"
-    "node_modules/form-data/node_modules/mime-db"
-    "node_modules/form-data/node_modules/mime-types"
-    "node_modules/forwarded"
-    "node_modules/fresh"
-    "node_modules/function-bind"
-    "node_modules/get-intrinsic"
-    "node_modules/get-proto"
-    "node_modules/gopd"
-    "node_modules/has-symbols"
-    "node_modules/has-tostringtag"
-    "node_modules/hasown"
-    "node_modules/http-errors"
-    "node_modules/http-proxy-agent"
-    "node_modules/https-proxy-agent"
-    "node_modules/iconv-lite"
-    "node_modules/inherits"
-    "node_modules/ipaddr.js"
-    "node_modules/is-docker"
-    "node_modules/is-inside-container"
-    "node_modules/is-promise"
-    "node_modules/is-wsl"
-    "node_modules/jose"
-    "node_modules/jsonwebtoken"
-    "node_modules/jwa"
-    "node_modules/jwks-rsa"
-    "node_modules/jws"
-    "node_modules/jwt-decode"
-    "node_modules/limiter"
-    "node_modules/lodash.clonedeep"
-    "node_modules/lodash.includes"
-    "node_modules/lodash.isboolean"
-    "node_modules/lodash.isinteger"
-    "node_modules/lodash.isnumber"
-    "node_modules/lodash.isplainobject"
-    "node_modules/lodash.isstring"
-    "node_modules/lodash.once"
-    "node_modules/lru-cache"
-    "node_modules/lru-memoizer"
-    "node_modules/math-intrinsics"
-    "node_modules/media-typer"
-    "node_modules/merge-descriptors"
-    "node_modules/mime-db"
-    "node_modules/mime-types"
-    "node_modules/ms"
-    "node_modules/negotiator"
-    "node_modules/object-assign"
-    "node_modules/object-inspect"
-    "node_modules/on-finished"
-    "node_modules/once"
-    "node_modules/open"
-    "node_modules/parseurl"
-    "node_modules/path-to-regexp"
-    "node_modules/proxy-addr"
-    "node_modules/proxy-from-env"
-    "node_modules/qs"
-    "node_modules/range-parser"
-    "node_modules/raw-body"
-    "node_modules/reflect-metadata"
-    "node_modules/router"
-    "node_modules/run-applescript"
-    "node_modules/safe-buffer"
-    "node_modules/safer-buffer"
-    "node_modules/semver"
-    "node_modules/send"
-    "node_modules/serve-static"
-    "node_modules/setprototypeof"
-    "node_modules/side-channel"
-    "node_modules/side-channel-list"
-    "node_modules/side-channel-map"
-    "node_modules/side-channel-weakmap"
-    "node_modules/statuses"
-    "node_modules/toidentifier"
-    "node_modules/tslib"
-    "node_modules/type-is"
-    "node_modules/type-is/node_modules/content-type"
-    "node_modules/typebox"
-    "node_modules/undici-types"
-    "node_modules/unpipe"
-    "node_modules/vary"
-    "node_modules/wrappy"
-    "node_modules/wsl-utils"
-    "node_modules/yallist"
-  ];
+  bundleDependencies = [ ];
+  bundledPackageRoots = [ ];
 }

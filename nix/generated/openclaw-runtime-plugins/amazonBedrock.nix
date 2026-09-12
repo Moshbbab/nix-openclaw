@@ -13,32 +13,32 @@
   minHostVersion = ">=2026.5.12-beta.1";
   expectedIntegrity = "";
   packageName = "@openclaw/amazon-bedrock-provider";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/amazon-bedrock-provider/-/amazon-bedrock-provider-2026.7.1.tgz";
-  npmIntegrity = "sha512-Y7x24MlFCATCVI6C043ikZ/HC8iTvZ3vDd18bhYwlsXUphGRtcOzQALgOQDhd9nYV1s8konjG0CoyB5v+RA9hw==";
-  npmShasum = "bb672fc505187439ec082db050dc73e35a1f955b";
-  nixHash = "sha256-SzRjDQoPcV/J6c8XFmpwHBYxir9LjQTqwb5kVbyRdpE=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/amazon-bedrock-provider/-/amazon-bedrock-provider-2026.9.4.tgz";
+  npmIntegrity = "sha512-gTCzC2d2tpoEe9pBgeKUj11XbCCPx7aJvJLWQ1n5UbhAUwofJSDHjnuSWxdbEaKnmudCAWGWmatYRH4pcCvEcA==";
+  npmShasum = "54667791679b3fb5654853e6261cb098cab208e5";
+  nixHash = "sha256-g+V6sxsGp4ZmJVaU9BQzwUSz/oaw0/Y/9DmAISoKzws=";
   dependencyMode = "bundled";
   manifestId = "amazon-bedrock";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
   runtimeSetupEntry = null;
   channels = [ ];
   contracts = {
-    memoryEmbeddingProviders = [
+    embeddingProviders = [
       "bedrock"
     ];
   };
   dependencies = {
-    "@aws-sdk/client-bedrock" = "3.1078.0";
-    "@aws-sdk/client-bedrock-runtime" = "3.1078.0";
-    "@aws-sdk/credential-provider-node" = "3.972.61";
-    "@smithy/node-http-handler" = "4.9.2";
-    "@smithy/shared-ini-file-loader" = "4.6.5";
-    "@smithy/types" = "4.15.1";
+    "@aws-sdk/client-bedrock" = "3.1121.0";
+    "@aws-sdk/client-bedrock-runtime" = "3.1121.0";
+    "@aws-sdk/credential-provider-node" = "3.972.81";
+    "@smithy/node-http-handler" = "4.11.3";
+    "@smithy/shared-ini-file-loader" = "4.7.2";
+    "@smithy/types" = "4.17.2";
   };
   optionalDependencies = { };
   bundleDependencies = [
@@ -50,34 +50,63 @@
     "@smithy/types"
   ];
   bundledPackageRoots = [
-    "node_modules/@aws/lambda-invoke-store"
     "node_modules/@aws-sdk/client-bedrock"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws/lambda-invoke-store"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/core"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/nested-clients"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/signature-v4-multi-region"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/token-providers"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/types"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@aws-sdk/xml-builder"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@smithy/core"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@smithy/fetch-http-handler"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/@smithy/signature-v4"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/bowser"
+    "node_modules/@aws-sdk/client-bedrock/node_modules/tslib"
     "node_modules/@aws-sdk/client-bedrock-runtime"
-    "node_modules/@aws-sdk/core"
-    "node_modules/@aws-sdk/credential-provider-env"
-    "node_modules/@aws-sdk/credential-provider-http"
-    "node_modules/@aws-sdk/credential-provider-ini"
-    "node_modules/@aws-sdk/credential-provider-login"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws/lambda-invoke-store"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/core"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/eventstream-handler-node"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/middleware-eventstream"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/middleware-websocket"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/nested-clients"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/signature-v4-multi-region"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/token-providers"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/types"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@aws-sdk/xml-builder"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@smithy/core"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@smithy/fetch-http-handler"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/@smithy/signature-v4"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/bowser"
+    "node_modules/@aws-sdk/client-bedrock-runtime/node_modules/tslib"
     "node_modules/@aws-sdk/credential-provider-node"
-    "node_modules/@aws-sdk/credential-provider-process"
-    "node_modules/@aws-sdk/credential-provider-sso"
-    "node_modules/@aws-sdk/credential-provider-web-identity"
-    "node_modules/@aws-sdk/eventstream-handler-node"
-    "node_modules/@aws-sdk/middleware-eventstream"
-    "node_modules/@aws-sdk/middleware-websocket"
-    "node_modules/@aws-sdk/nested-clients"
-    "node_modules/@aws-sdk/signature-v4-multi-region"
-    "node_modules/@aws-sdk/token-providers"
-    "node_modules/@aws-sdk/types"
-    "node_modules/@aws-sdk/xml-builder"
-    "node_modules/@smithy/core"
-    "node_modules/@smithy/credential-provider-imds"
-    "node_modules/@smithy/fetch-http-handler"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws/lambda-invoke-store"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/core"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-env"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-http"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-ini"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-login"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-process"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-sso"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/credential-provider-web-identity"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/nested-clients"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/signature-v4-multi-region"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/token-providers"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/types"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@aws-sdk/xml-builder"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@smithy/core"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@smithy/credential-provider-imds"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@smithy/fetch-http-handler"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/@smithy/signature-v4"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/bowser"
+    "node_modules/@aws-sdk/credential-provider-node/node_modules/tslib"
     "node_modules/@smithy/node-http-handler"
+    "node_modules/@smithy/node-http-handler/node_modules/@smithy/core"
+    "node_modules/@smithy/node-http-handler/node_modules/tslib"
     "node_modules/@smithy/shared-ini-file-loader"
-    "node_modules/@smithy/signature-v4"
+    "node_modules/@smithy/shared-ini-file-loader/node_modules/@smithy/core"
+    "node_modules/@smithy/shared-ini-file-loader/node_modules/tslib"
     "node_modules/@smithy/types"
-    "node_modules/bowser"
-    "node_modules/tslib"
+    "node_modules/@smithy/types/node_modules/tslib"
   ];
 }

@@ -13,15 +13,26 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/twitch";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/twitch/-/twitch-2026.7.1.tgz";
-  npmIntegrity = "sha512-avPL8XslyRrwHGIt+P+EQidCuAsxofJa/mWWQjhgQ+bG5MJIeuo0HAwaUU5NfwYuszL2K0xIS/k8GPnr006j0g==";
-  npmShasum = "ef2d138f09da503013d46d1a0d396bce9bfd83f1";
-  nixHash = "sha256-Yt/oUGlGXyElkiGnZsFMKFDBF7qcT+2wpDudB9/0Kc4=";
-  dependencyMode = "bundled";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/twitch/-/twitch-2026.9.4.tgz";
+  npmIntegrity = "sha512-HSJdAZ8q7NSdvxT5Z/KlOxNX0ahQDuurltRSlzjorQvzJOUeNCSTl4Id8Rc6kjzD+AfKm9f0OEQegdH62CISBA==";
+  npmShasum = "a4266a98739f77b8b8ba6d6ab67e733bf796dd5b";
+  nixHash = "sha256-zDTl6jZ0eeY/StiSFJtIh35nMIro+mh78T6rZMe5iEo=";
+  dependencyMode = "package-lock";
+  npmDepsHash = "sha256-kEPviCa8ppOjSj+f9BVgbG/O7bheLVTjF+V7DbXR2ro=";
+  npmPackageLockFile = "twitch.package-lock.json";
+  npmPackageLockSha256 = "ba762026bc7acb1239489113695e2fc2ed05e86919c398545b6072f9e634d7f0";
+  npmPackageLockEvidence = {
+    assetName = "openclaw-2026.9.4-dependency-evidence.zip";
+    assetUrl = "https://github.com/openclaw/openclaw/releases/download/v2026.9.4/openclaw-2026.9.4-dependency-evidence.zip";
+    assetNixHash = "sha256-rX/GaPQdsuy4yOr6N7CKLb6eTqYDMfVkFFLNgylmAC0=";
+    source = "release";
+    sourceSha = "3a9d69db306cd7f081e06254cb89c4bcc14a7107";
+    generatedAt = "2026-09-10T23:00:16.995Z";
+  };
   manifestId = "twitch";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -31,44 +42,12 @@
   ];
   contracts = { };
   dependencies = {
-    "@twurple/api" = "8.1.4";
+    "@twurple/api-call" = "8.1.4";
     "@twurple/auth" = "8.1.4";
     "@twurple/chat" = "8.1.4";
     zod = "4.4.3";
   };
   optionalDependencies = { };
-  bundleDependencies = [
-    "@twurple/api"
-    "@twurple/auth"
-    "@twurple/chat"
-    "zod"
-  ];
-  bundledPackageRoots = [
-    "node_modules/@d-fischer/cache-decorators"
-    "node_modules/@d-fischer/connection"
-    "node_modules/@d-fischer/deprecate"
-    "node_modules/@d-fischer/detect-node"
-    "node_modules/@d-fischer/escape-string-regexp"
-    "node_modules/@d-fischer/isomorphic-ws"
-    "node_modules/@d-fischer/logger"
-    "node_modules/@d-fischer/rate-limiter"
-    "node_modules/@d-fischer/shared-utils"
-    "node_modules/@d-fischer/typed-event-emitter"
-    "node_modules/@twurple/api"
-    "node_modules/@twurple/api-call"
-    "node_modules/@twurple/auth"
-    "node_modules/@twurple/chat"
-    "node_modules/@twurple/common"
-    "node_modules/@types/node"
-    "node_modules/@types/ws"
-    "node_modules/@types/ws/node_modules/@types/node"
-    "node_modules/@types/ws/node_modules/undici-types"
-    "node_modules/ircv3"
-    "node_modules/klona"
-    "node_modules/retry"
-    "node_modules/tslib"
-    "node_modules/undici-types"
-    "node_modules/ws"
-    "node_modules/zod"
-  ];
+  bundleDependencies = [ ];
+  bundledPackageRoots = [ ];
 }

@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.25";
   expectedIntegrity = "";
   packageName = "@openclaw/diagnostics-otel";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/diagnostics-otel/-/diagnostics-otel-2026.7.1.tgz";
-  npmIntegrity = "sha512-XXhMifYWTgoR6yFN4T3JkHxdPvQCe8k1cNZjVIgXNmk1svCdBWuALfQQicmpemlmWwauIQuHYgBURY6k63e+rw==";
-  npmShasum = "b10d3b4adf6e210039271b3b6f71f29e7ca754a6";
-  nixHash = "sha256-pEeiI89HZIZVcOcekvtRc795o9gwfdmTgutW6mr/k/Y=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/diagnostics-otel/-/diagnostics-otel-2026.9.4.tgz";
+  npmIntegrity = "sha512-oT0r0D7TgOeUIfSiOmfFNlnxO9UVdEJWx28MQnaj2nvwhIEqAmP3Pn3mvXg27BA0dIBedEGCZ5LilMxTxJ03iQ==";
+  npmShasum = "453aeb9e0a9cf899f475e22c57b464fe9b471fff";
+  nixHash = "sha256-2d3ujIyCw5UCkWKJEkvT7XvfcawDONGxUZZ4GqJtCNk=";
   dependencyMode = "bundled";
   manifestId = "diagnostics-otel";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -30,103 +30,62 @@
   contracts = { };
   dependencies = {
     "@opentelemetry/api" = "1.9.1";
-    "@opentelemetry/api-logs" = "0.219.0";
-    "@opentelemetry/exporter-logs-otlp-proto" = "0.219.0";
-    "@opentelemetry/exporter-metrics-otlp-proto" = "0.219.0";
-    "@opentelemetry/exporter-trace-otlp-proto" = "0.219.0";
-    "@opentelemetry/resources" = "2.8.0";
-    "@opentelemetry/sdk-logs" = "0.219.0";
-    "@opentelemetry/sdk-metrics" = "2.8.0";
-    "@opentelemetry/sdk-node" = "0.219.0";
-    "@opentelemetry/sdk-trace-base" = "2.8.0";
-    "@opentelemetry/semantic-conventions" = "1.41.1";
+    "@opentelemetry/api-logs" = "0.221.0";
+    "@opentelemetry/context-async-hooks" = "2.10.0";
+    "@opentelemetry/core" = "2.10.0";
+    "@opentelemetry/exporter-logs-otlp-proto" = "0.221.0";
+    "@opentelemetry/exporter-metrics-otlp-proto" = "0.221.0";
+    "@opentelemetry/exporter-trace-otlp-proto" = "0.221.0";
+    "@opentelemetry/propagator-b3" = "2.10.0";
+    "@opentelemetry/propagator-jaeger" = "2.10.0";
+    "@opentelemetry/resources" = "2.10.0";
+    "@opentelemetry/sdk-logs" = "0.221.0";
+    "@opentelemetry/sdk-metrics" = "2.10.0";
+    "@opentelemetry/sdk-trace-base" = "2.10.0";
+    "@opentelemetry/semantic-conventions" = "1.43.0";
   };
   optionalDependencies = { };
   bundleDependencies = [
     "@opentelemetry/api"
     "@opentelemetry/api-logs"
+    "@opentelemetry/context-async-hooks"
+    "@opentelemetry/core"
     "@opentelemetry/exporter-logs-otlp-proto"
     "@opentelemetry/exporter-metrics-otlp-proto"
     "@opentelemetry/exporter-trace-otlp-proto"
+    "@opentelemetry/propagator-b3"
+    "@opentelemetry/propagator-jaeger"
     "@opentelemetry/resources"
     "@opentelemetry/sdk-logs"
     "@opentelemetry/sdk-metrics"
-    "@opentelemetry/sdk-node"
     "@opentelemetry/sdk-trace-base"
     "@opentelemetry/semantic-conventions"
   ];
   bundledPackageRoots = [
-    "node_modules/@grpc/grpc-js"
-    "node_modules/@grpc/proto-loader"
-    "node_modules/@js-sdsl/ordered-map"
     "node_modules/@opentelemetry/api"
     "node_modules/@opentelemetry/api-logs"
-    "node_modules/@opentelemetry/configuration"
     "node_modules/@opentelemetry/context-async-hooks"
     "node_modules/@opentelemetry/core"
-    "node_modules/@opentelemetry/exporter-logs-otlp-grpc"
-    "node_modules/@opentelemetry/exporter-logs-otlp-http"
     "node_modules/@opentelemetry/exporter-logs-otlp-proto"
-    "node_modules/@opentelemetry/exporter-metrics-otlp-grpc"
-    "node_modules/@opentelemetry/exporter-metrics-otlp-http"
+    "node_modules/@opentelemetry/exporter-logs-otlp-proto/node_modules/@opentelemetry/otlp-exporter-base"
+    "node_modules/@opentelemetry/exporter-logs-otlp-proto/node_modules/@opentelemetry/otlp-transformer"
+    "node_modules/@opentelemetry/exporter-logs-otlp-proto/node_modules/@opentelemetry/sdk-trace"
     "node_modules/@opentelemetry/exporter-metrics-otlp-proto"
-    "node_modules/@opentelemetry/exporter-prometheus"
-    "node_modules/@opentelemetry/exporter-trace-otlp-grpc"
-    "node_modules/@opentelemetry/exporter-trace-otlp-http"
+    "node_modules/@opentelemetry/exporter-metrics-otlp-proto/node_modules/@opentelemetry/exporter-metrics-otlp-http"
+    "node_modules/@opentelemetry/exporter-metrics-otlp-proto/node_modules/@opentelemetry/otlp-exporter-base"
+    "node_modules/@opentelemetry/exporter-metrics-otlp-proto/node_modules/@opentelemetry/otlp-transformer"
+    "node_modules/@opentelemetry/exporter-metrics-otlp-proto/node_modules/@opentelemetry/sdk-trace"
     "node_modules/@opentelemetry/exporter-trace-otlp-proto"
-    "node_modules/@opentelemetry/exporter-zipkin"
-    "node_modules/@opentelemetry/instrumentation"
-    "node_modules/@opentelemetry/otlp-exporter-base"
-    "node_modules/@opentelemetry/otlp-grpc-exporter-base"
-    "node_modules/@opentelemetry/otlp-transformer"
+    "node_modules/@opentelemetry/exporter-trace-otlp-proto/node_modules/@opentelemetry/otlp-exporter-base"
+    "node_modules/@opentelemetry/exporter-trace-otlp-proto/node_modules/@opentelemetry/otlp-transformer"
+    "node_modules/@opentelemetry/exporter-trace-otlp-proto/node_modules/@opentelemetry/sdk-trace"
     "node_modules/@opentelemetry/propagator-b3"
     "node_modules/@opentelemetry/propagator-jaeger"
     "node_modules/@opentelemetry/resources"
     "node_modules/@opentelemetry/sdk-logs"
     "node_modules/@opentelemetry/sdk-metrics"
-    "node_modules/@opentelemetry/sdk-node"
     "node_modules/@opentelemetry/sdk-trace-base"
-    "node_modules/@opentelemetry/sdk-trace-node"
+    "node_modules/@opentelemetry/sdk-trace-base/node_modules/@opentelemetry/sdk-trace"
     "node_modules/@opentelemetry/semantic-conventions"
-    "node_modules/@protobufjs/aspromise"
-    "node_modules/@protobufjs/base64"
-    "node_modules/@protobufjs/codegen"
-    "node_modules/@protobufjs/eventemitter"
-    "node_modules/@protobufjs/fetch"
-    "node_modules/@protobufjs/float"
-    "node_modules/@protobufjs/inquire"
-    "node_modules/@protobufjs/path"
-    "node_modules/@protobufjs/pool"
-    "node_modules/@protobufjs/utf8"
-    "node_modules/@types/node"
-    "node_modules/acorn"
-    "node_modules/acorn-import-attributes"
-    "node_modules/ansi-regex"
-    "node_modules/ansi-styles"
-    "node_modules/cjs-module-lexer"
-    "node_modules/cliui"
-    "node_modules/color-convert"
-    "node_modules/color-name"
-    "node_modules/debug"
-    "node_modules/emoji-regex"
-    "node_modules/escalade"
-    "node_modules/get-caller-file"
-    "node_modules/import-in-the-middle"
-    "node_modules/is-fullwidth-code-point"
-    "node_modules/lodash.camelcase"
-    "node_modules/long"
-    "node_modules/module-details-from-path"
-    "node_modules/ms"
-    "node_modules/protobufjs"
-    "node_modules/require-directory"
-    "node_modules/require-in-the-middle"
-    "node_modules/string-width"
-    "node_modules/strip-ansi"
-    "node_modules/undici-types"
-    "node_modules/wrap-ansi"
-    "node_modules/y18n"
-    "node_modules/yaml"
-    "node_modules/yargs"
-    "node_modules/yargs-parser"
   ];
 }

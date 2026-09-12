@@ -2,14 +2,14 @@
 {
   owner = "openclaw";
   repo = "openclaw";
-  pnpmMajor = "11";
+  pnpmMajor = "12";
   applyPublicSurfaceHardlinksPatch = false;
   applySkipPluginAutoEnableNixModePatch = false;
   applyNixStorePluginOwnershipPatch = true;
-  releaseTag = "v2026.7.1-2";
-  releaseVersion = "2026.7.1-2";
-  runtimePluginVersion = "2026.7.1";
-  rev = "0790d9f593ad30c940ed93b5872a8cf6d6f3cf8c";
-  hash = "sha256-kpiKCTjXX4l525IJDNsnI7j2IT6ZYdqvFTyRlKGgomg=";
-  gatewayNpmDepsHash = "sha256-wgFsto4dpdVHl0x+H/QL/Rf6bSznmGJFd+tfirnACu8=";
+  releaseTag = "v2026.9.4";
+  releaseVersion = "2026.9.4";
+  runtimePluginVersion = "2026.9.4";
+  rev = "3a9d69db306cd7f081e06254cb89c4bcc14a7107";
+  hash = "sha256-xeUf0Emyhen4hnxjhbTI59d02QfB3YWTxhlqNkKuiUA=";
+  gatewayNpmDepsHash = "sha256-zsW2pP99pLjenw5C6boJIF6qYcgqG9im79bSHh2E0Mg=";
 }

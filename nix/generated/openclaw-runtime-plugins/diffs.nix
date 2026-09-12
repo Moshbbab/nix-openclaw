@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.30";
   expectedIntegrity = "";
   packageName = "@openclaw/diffs";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/diffs/-/diffs-2026.7.1.tgz";
-  npmIntegrity = "sha512-x4rMir5ukx1j/XvfCHqMaQECb9sT2DzlMFaMZBykLiRf7HPJyALO+nwM1TpS690+yJ7SSh7I3E/Q5DuGy0FHdA==";
-  npmShasum = "83fd42814f6d771b2e7343b33f088a089f36c772";
-  nixHash = "sha256-sgCqxtw2iWCqFWlsm/FdMTB9Bponh6d1TqY+MGHaPQk=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/diffs/-/diffs-2026.9.4.tgz";
+  npmIntegrity = "sha512-67EDyAYvPZWDpOpdRo7EQlaLlSd7J/rbw2ZxSm75gZQgEQssbOEWXLeqhWBiOhICC2jNpyLFh1zDZvz9T35d5Q==";
+  npmShasum = "35ccb8c37813a3075d21fb6ca929ab169e6d7782";
+  nixHash = "sha256-CXaOyTikTOxbzUG8HCkWm9U82YTL+8pbcCBAfZqJ/qE=";
   dependencyMode = "bundled";
   manifestId = "diffs";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -33,10 +33,10 @@
     ];
   };
   dependencies = {
-    "@pierre/diffs" = "1.2.12";
-    "@shikijs/langs" = "4.3.0";
-    playwright-core = "1.61.1";
-    typebox = "1.3.3";
+    "@pierre/diffs" = "1.3.6";
+    "@shikijs/langs" = "4.4.3";
+    playwright-core = "1.62.1";
+    typebox = "1.3.18";
     zod = "4.4.3";
   };
   optionalDependencies = { };
@@ -49,58 +49,62 @@
   ];
   bundledPackageRoots = [
     "node_modules/@pierre/diffs"
-    "node_modules/@pierre/theme"
-    "node_modules/@pierre/theming"
-    "node_modules/@shikijs/core"
-    "node_modules/@shikijs/engine-javascript"
-    "node_modules/@shikijs/engine-oniguruma"
+    "node_modules/@pierre/diffs/node_modules/@pierre/theme"
+    "node_modules/@pierre/diffs/node_modules/@pierre/theming"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/core"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/engine-javascript"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/engine-oniguruma"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/primitive"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/themes"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/transformers"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/types"
+    "node_modules/@pierre/diffs/node_modules/@shikijs/vscode-textmate"
+    "node_modules/@pierre/diffs/node_modules/@types/hast"
+    "node_modules/@pierre/diffs/node_modules/@types/mdast"
+    "node_modules/@pierre/diffs/node_modules/@types/unist"
+    "node_modules/@pierre/diffs/node_modules/@ungap/structured-clone"
+    "node_modules/@pierre/diffs/node_modules/ccount"
+    "node_modules/@pierre/diffs/node_modules/character-entities-html4"
+    "node_modules/@pierre/diffs/node_modules/character-entities-legacy"
+    "node_modules/@pierre/diffs/node_modules/comma-separated-tokens"
+    "node_modules/@pierre/diffs/node_modules/dequal"
+    "node_modules/@pierre/diffs/node_modules/devlop"
+    "node_modules/@pierre/diffs/node_modules/diff"
+    "node_modules/@pierre/diffs/node_modules/hast-util-to-html"
+    "node_modules/@pierre/diffs/node_modules/hast-util-whitespace"
+    "node_modules/@pierre/diffs/node_modules/html-void-elements"
+    "node_modules/@pierre/diffs/node_modules/lru_map"
+    "node_modules/@pierre/diffs/node_modules/mdast-util-to-hast"
+    "node_modules/@pierre/diffs/node_modules/micromark-util-character"
+    "node_modules/@pierre/diffs/node_modules/micromark-util-encode"
+    "node_modules/@pierre/diffs/node_modules/micromark-util-sanitize-uri"
+    "node_modules/@pierre/diffs/node_modules/micromark-util-symbol"
+    "node_modules/@pierre/diffs/node_modules/micromark-util-types"
+    "node_modules/@pierre/diffs/node_modules/oniguruma-parser"
+    "node_modules/@pierre/diffs/node_modules/oniguruma-to-es"
+    "node_modules/@pierre/diffs/node_modules/property-information"
+    "node_modules/@pierre/diffs/node_modules/regex"
+    "node_modules/@pierre/diffs/node_modules/regex-recursion"
+    "node_modules/@pierre/diffs/node_modules/regex-utilities"
+    "node_modules/@pierre/diffs/node_modules/shiki"
+    "node_modules/@pierre/diffs/node_modules/space-separated-tokens"
+    "node_modules/@pierre/diffs/node_modules/stringify-entities"
+    "node_modules/@pierre/diffs/node_modules/trim-lines"
+    "node_modules/@pierre/diffs/node_modules/unist-util-is"
+    "node_modules/@pierre/diffs/node_modules/unist-util-position"
+    "node_modules/@pierre/diffs/node_modules/unist-util-stringify-position"
+    "node_modules/@pierre/diffs/node_modules/unist-util-visit"
+    "node_modules/@pierre/diffs/node_modules/unist-util-visit-parents"
+    "node_modules/@pierre/diffs/node_modules/vfile"
+    "node_modules/@pierre/diffs/node_modules/vfile-message"
+    "node_modules/@pierre/diffs/node_modules/zwitch"
     "node_modules/@shikijs/langs"
-    "node_modules/@shikijs/primitive"
-    "node_modules/@shikijs/themes"
-    "node_modules/@shikijs/transformers"
-    "node_modules/@shikijs/types"
-    "node_modules/@shikijs/vscode-textmate"
-    "node_modules/@types/hast"
-    "node_modules/@types/mdast"
-    "node_modules/@types/unist"
-    "node_modules/@ungap/structured-clone"
-    "node_modules/ccount"
-    "node_modules/character-entities-html4"
-    "node_modules/character-entities-legacy"
-    "node_modules/comma-separated-tokens"
-    "node_modules/dequal"
-    "node_modules/devlop"
-    "node_modules/diff"
-    "node_modules/hast-util-to-html"
-    "node_modules/hast-util-whitespace"
-    "node_modules/html-void-elements"
-    "node_modules/lru_map"
-    "node_modules/mdast-util-to-hast"
-    "node_modules/micromark-util-character"
-    "node_modules/micromark-util-encode"
-    "node_modules/micromark-util-sanitize-uri"
-    "node_modules/micromark-util-symbol"
-    "node_modules/micromark-util-types"
-    "node_modules/oniguruma-parser"
-    "node_modules/oniguruma-to-es"
+    "node_modules/@shikijs/langs/node_modules/@shikijs/types"
+    "node_modules/@shikijs/langs/node_modules/@shikijs/vscode-textmate"
+    "node_modules/@shikijs/langs/node_modules/@types/hast"
+    "node_modules/@shikijs/langs/node_modules/@types/unist"
     "node_modules/playwright-core"
-    "node_modules/property-information"
-    "node_modules/regex"
-    "node_modules/regex-recursion"
-    "node_modules/regex-utilities"
-    "node_modules/shiki"
-    "node_modules/space-separated-tokens"
-    "node_modules/stringify-entities"
-    "node_modules/trim-lines"
     "node_modules/typebox"
-    "node_modules/unist-util-is"
-    "node_modules/unist-util-position"
-    "node_modules/unist-util-stringify-position"
-    "node_modules/unist-util-visit"
-    "node_modules/unist-util-visit-parents"
-    "node_modules/vfile"
-    "node_modules/vfile-message"
     "node_modules/zod"
-    "node_modules/zwitch"
   ];
 }

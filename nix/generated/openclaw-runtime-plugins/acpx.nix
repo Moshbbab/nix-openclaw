@@ -13,16 +13,26 @@
   minHostVersion = ">=2026.4.25";
   expectedIntegrity = "";
   packageName = "@openclaw/acpx";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/acpx/-/acpx-2026.7.1.tgz";
-  npmIntegrity = "sha512-aAR3XixxhKTEMwfK4EKupbA45gEQJKAEh7BFSeU2ohEoSmUoPS2ynk35xsY2YcDNJjQQZ2MYVQYL5wC3G6oihg==";
-  npmShasum = "a0112d416c6ebe3dac721ceb338674a74c05dde5";
-  nixHash = "sha256-UcTv/0oQDyHwPqEQlNSvNFZ79a6feGc1uLFGF18sUqk=";
-  dependencyMode = "shrinkwrap";
-  npmDepsHash = "sha256-XzA7A091BT8VFqZkiJzOUYYMbqHLn1NyEJpqn77Dbr0=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/acpx/-/acpx-2026.9.4.tgz";
+  npmIntegrity = "sha512-rZCX7BL8fMeJLa7shTD7uFQWOrtFmTGr/I7CWB35Am0O/KaascDkEjfOeddK0pUBq/ap4buYJyShwbW51cTVHw==";
+  npmShasum = "b6816e24c34c96a112b164d1f87a6f2d62ec75d9";
+  nixHash = "sha256-npJE6nkXseINh86nwxC9AOCXsYdwyCzOnsq9L4xREzI=";
+  dependencyMode = "package-lock";
+  npmDepsHash = "sha256-8JU1D73nmhVh+IFASz62uCUssw/J8G/lv8faJFBl8ak=";
+  npmPackageLockFile = "acpx.package-lock.json";
+  npmPackageLockSha256 = "0a5512f3616bb83eb6a7c431a94be4e1ce861b82e6b7c1dbbf0295c5b5ae166a";
+  npmPackageLockEvidence = {
+    assetName = "openclaw-2026.9.4-dependency-evidence.zip";
+    assetUrl = "https://github.com/openclaw/openclaw/releases/download/v2026.9.4/openclaw-2026.9.4-dependency-evidence.zip";
+    assetNixHash = "sha256-rX/GaPQdsuy4yOr6N7CKLb6eTqYDMfVkFFLNgylmAC0=";
+    source = "release";
+    sourceSha = "3a9d69db306cd7f081e06254cb89c4bcc14a7107";
+    generatedAt = "2026-09-10T23:00:16.995Z";
+  };
   manifestId = "acpx";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -30,9 +40,10 @@
   channels = [ ];
   contracts = { };
   dependencies = {
-    "@agentclientprotocol/claude-agent-acp" = "0.55.0";
-    "@zed-industries/codex-acp" = "0.16.0";
-    acpx = "0.11.2";
+    "@agentclientprotocol/claude-agent-acp" = "0.70.0";
+    "@agentclientprotocol/codex-acp" = "1.6.2";
+    acpx = "0.13.2";
+    smol-toml = "1.8.0";
     zod = "4.4.3";
   };
   optionalDependencies = { };

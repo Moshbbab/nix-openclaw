@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.5.29";
   expectedIntegrity = "";
   packageName = "@openclaw/feishu";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/feishu/-/feishu-2026.7.1.tgz";
-  npmIntegrity = "sha512-ZqiRTnlJlmTeWEdWYmjATePC2WOqi2HPq/yeZr2orASWHuYonO38mnU7RU3UvYVQQ3vHAPCPSpMLsKPlCquIPA==";
-  npmShasum = "378b11d1bf0b208ea8647c4e981e0f9527a6561b";
-  nixHash = "sha256-/JxT5I6j0JdU3IdUjUNI40sbJ7UVDwhzh+sKRoqGG0U=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/feishu/-/feishu-2026.9.4.tgz";
+  npmIntegrity = "sha512-ayRjtjOzVYF1K8msWo3bJi1sHEbAMDRqTElcMlU/H/WJxvfRRYPV/O6B84j/zeJQaMSgZYmMWGQG1CUD8APVlA==";
+  npmShasum = "0559b9523bc2f6f8209eee67e34345289900cada";
+  nixHash = "sha256-xDPTkvw1pZHQuhuhvGF+oEMasZp18pDHNgPthsKjUgc=";
   dependencyMode = "bundled";
   manifestId = "feishu";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -48,68 +48,128 @@
     ];
   };
   dependencies = {
-    "@larksuiteoapi/node-sdk" = "1.68.0";
-    typebox = "1.3.3";
+    "@larksuiteoapi/node-sdk" = "1.73.0";
+    mdast-util-from-markdown = "2.0.3";
+    mdast-util-gfm-table = "2.0.0";
+    micromark-extension-gfm-table = "2.1.1";
+    typebox = "1.3.18";
     zod = "4.4.3";
   };
   optionalDependencies = { };
   bundleDependencies = [
     "@larksuiteoapi/node-sdk"
+    "mdast-util-from-markdown"
+    "mdast-util-gfm-table"
+    "micromark-extension-gfm-table"
     "typebox"
     "zod"
   ];
   bundledPackageRoots = [
     "node_modules/@larksuiteoapi/node-sdk"
-    "node_modules/@protobufjs/aspromise"
-    "node_modules/@protobufjs/base64"
-    "node_modules/@protobufjs/codegen"
-    "node_modules/@protobufjs/eventemitter"
-    "node_modules/@protobufjs/fetch"
-    "node_modules/@protobufjs/float"
-    "node_modules/@protobufjs/inquire"
-    "node_modules/@protobufjs/path"
-    "node_modules/@protobufjs/pool"
-    "node_modules/@protobufjs/utf8"
-    "node_modules/@types/node"
-    "node_modules/asynckit"
-    "node_modules/axios"
-    "node_modules/call-bind-apply-helpers"
-    "node_modules/call-bound"
-    "node_modules/combined-stream"
-    "node_modules/delayed-stream"
-    "node_modules/dunder-proto"
-    "node_modules/es-define-property"
-    "node_modules/es-errors"
-    "node_modules/es-object-atoms"
-    "node_modules/es-set-tostringtag"
-    "node_modules/follow-redirects"
-    "node_modules/form-data"
-    "node_modules/function-bind"
-    "node_modules/get-intrinsic"
-    "node_modules/get-proto"
-    "node_modules/gopd"
-    "node_modules/has-symbols"
-    "node_modules/has-tostringtag"
-    "node_modules/hasown"
-    "node_modules/lodash.identity"
-    "node_modules/lodash.merge"
-    "node_modules/lodash.pickby"
-    "node_modules/long"
-    "node_modules/math-intrinsics"
-    "node_modules/mime-db"
-    "node_modules/mime-types"
-    "node_modules/object-inspect"
-    "node_modules/protobufjs"
-    "node_modules/proxy-from-env"
-    "node_modules/qs"
-    "node_modules/safe-buffer"
-    "node_modules/side-channel"
-    "node_modules/side-channel-list"
-    "node_modules/side-channel-map"
-    "node_modules/side-channel-weakmap"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/agent-base"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/asynckit"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/axios"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/call-bind-apply-helpers"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/call-bound"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/combined-stream"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/debug"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/delayed-stream"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/dunder-proto"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/es-define-property"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/es-errors"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/es-object-atoms"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/es-set-tostringtag"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/follow-redirects"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/form-data"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/function-bind"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/get-intrinsic"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/get-proto"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/gopd"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/has-symbols"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/has-tostringtag"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/hasown"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/https-proxy-agent"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/lodash.identity"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/lodash.merge"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/lodash.pickby"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/long"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/math-intrinsics"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/mime-db"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/mime-types"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/ms"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/object-inspect"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/protobufjs"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/proxy-from-env"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/qs"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/side-channel"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/side-channel-list"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/side-channel-map"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/side-channel-weakmap"
+    "node_modules/@larksuiteoapi/node-sdk/node_modules/ws"
+    "node_modules/mdast-util-from-markdown"
+    "node_modules/mdast-util-from-markdown/node_modules/@types/debug"
+    "node_modules/mdast-util-from-markdown/node_modules/@types/mdast"
+    "node_modules/mdast-util-from-markdown/node_modules/@types/ms"
+    "node_modules/mdast-util-from-markdown/node_modules/@types/unist"
+    "node_modules/mdast-util-from-markdown/node_modules/character-entities"
+    "node_modules/mdast-util-from-markdown/node_modules/debug"
+    "node_modules/mdast-util-from-markdown/node_modules/decode-named-character-reference"
+    "node_modules/mdast-util-from-markdown/node_modules/dequal"
+    "node_modules/mdast-util-from-markdown/node_modules/devlop"
+    "node_modules/mdast-util-from-markdown/node_modules/mdast-util-to-string"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-core-commonmark"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-factory-destination"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-factory-label"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-factory-space"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-factory-title"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-factory-whitespace"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-character"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-chunked"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-classify-character"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-combine-extensions"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-decode-numeric-character-reference"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-decode-string"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-encode"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-html-tag-name"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-normalize-identifier"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-resolve-all"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-sanitize-uri"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-subtokenize"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-symbol"
+    "node_modules/mdast-util-from-markdown/node_modules/micromark-util-types"
+    "node_modules/mdast-util-from-markdown/node_modules/ms"
+    "node_modules/mdast-util-from-markdown/node_modules/unist-util-stringify-position"
+    "node_modules/mdast-util-gfm-table"
+    "node_modules/mdast-util-gfm-table/node_modules/@types/mdast"
+    "node_modules/mdast-util-gfm-table/node_modules/@types/unist"
+    "node_modules/mdast-util-gfm-table/node_modules/character-entities"
+    "node_modules/mdast-util-gfm-table/node_modules/decode-named-character-reference"
+    "node_modules/mdast-util-gfm-table/node_modules/dequal"
+    "node_modules/mdast-util-gfm-table/node_modules/devlop"
+    "node_modules/mdast-util-gfm-table/node_modules/longest-streak"
+    "node_modules/mdast-util-gfm-table/node_modules/markdown-table"
+    "node_modules/mdast-util-gfm-table/node_modules/mdast-util-phrasing"
+    "node_modules/mdast-util-gfm-table/node_modules/mdast-util-to-markdown"
+    "node_modules/mdast-util-gfm-table/node_modules/mdast-util-to-string"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-character"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-classify-character"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-decode-numeric-character-reference"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-decode-string"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-symbol"
+    "node_modules/mdast-util-gfm-table/node_modules/micromark-util-types"
+    "node_modules/mdast-util-gfm-table/node_modules/unist-util-is"
+    "node_modules/mdast-util-gfm-table/node_modules/unist-util-visit"
+    "node_modules/mdast-util-gfm-table/node_modules/unist-util-visit-parents"
+    "node_modules/mdast-util-gfm-table/node_modules/zwitch"
+    "node_modules/micromark-extension-gfm-table"
+    "node_modules/micromark-extension-gfm-table/node_modules/dequal"
+    "node_modules/micromark-extension-gfm-table/node_modules/devlop"
+    "node_modules/micromark-extension-gfm-table/node_modules/micromark-factory-space"
+    "node_modules/micromark-extension-gfm-table/node_modules/micromark-util-character"
+    "node_modules/micromark-extension-gfm-table/node_modules/micromark-util-symbol"
+    "node_modules/micromark-extension-gfm-table/node_modules/micromark-util-types"
     "node_modules/typebox"
-    "node_modules/undici-types"
-    "node_modules/ws"
     "node_modules/zod"
   ];
 }

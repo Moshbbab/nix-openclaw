@@ -13,15 +13,15 @@
   minHostVersion = ">=2026.4.10";
   expectedIntegrity = "";
   packageName = "@openclaw/zalouser";
-  version = "2026.7.1";
-  tarballUrl = "https://registry.npmjs.org/@openclaw/zalouser/-/zalouser-2026.7.1.tgz";
-  npmIntegrity = "sha512-klg0BOOTDv4xUykgA/pTZDsRrI9dzagq23OlPupCLrFijDOebPxGYaYdWDSPy4zBJAWjjnSrgyCB+5OuCMvZGw==";
-  npmShasum = "ddd42ffa571e93a881ca5c95203eb7a49713f6c6";
-  nixHash = "sha256-5AItXcOQCUYFI7eWRFwInK7c5+h1qBbQ5M0Y6KSKAIk=";
+  version = "2026.9.4";
+  tarballUrl = "https://registry.npmjs.org/@openclaw/zalouser/-/zalouser-2026.9.4.tgz";
+  npmIntegrity = "sha512-+u+JUYlmON7eML1M9+92epEw8tEr4s2vWO6Lf/nxyLjQvPmOu2l3+cB3PC+I/7Xr1MWZLe44nhV3cU5m8A8T5Q==";
+  npmShasum = "285d4bbe396211f93f0e04182b9f8e6f6ab4901d";
+  nixHash = "sha256-vb6nKZSp2TunqFJvfn0XtPhWPIgpYLe4uYe0G+lq6RY=";
   dependencyMode = "bundled";
   manifestId = "zalouser";
-  openclawCompat = ">=2026.7.1";
-  peerOpenClaw = ">=2026.7.1";
+  openclawCompat = ">=2026.9.4";
+  peerOpenClaw = ">=2026.9.4";
   runtimeExtensions = [
     "./dist/index.js"
   ];
@@ -35,7 +35,7 @@
     ];
   };
   dependencies = {
-    typebox = "1.3.3";
+    typebox = "1.3.18";
     zca-js = "2.1.2";
     zod = "4.4.3";
   };
@@ -46,43 +46,38 @@
     "zod"
   ];
   bundledPackageRoots = [
-    "node_modules/asynckit"
-    "node_modules/bignumber.js"
-    "node_modules/call-bind-apply-helpers"
-    "node_modules/combined-stream"
-    "node_modules/crypto-js"
-    "node_modules/delayed-stream"
-    "node_modules/dunder-proto"
-    "node_modules/es-define-property"
-    "node_modules/es-errors"
-    "node_modules/es-object-atoms"
-    "node_modules/es-set-tostringtag"
-    "node_modules/form-data"
-    "node_modules/function-bind"
-    "node_modules/get-intrinsic"
-    "node_modules/get-proto"
-    "node_modules/gopd"
-    "node_modules/has-symbols"
-    "node_modules/has-tostringtag"
-    "node_modules/hasown"
-    "node_modules/json-bigint"
-    "node_modules/math-intrinsics"
-    "node_modules/mime-db"
-    "node_modules/mime-types"
-    "node_modules/pako"
-    "node_modules/psl"
-    "node_modules/punycode"
-    "node_modules/querystringify"
-    "node_modules/requires-port"
-    "node_modules/safe-buffer"
-    "node_modules/semver"
-    "node_modules/spark-md5"
-    "node_modules/tough-cookie"
     "node_modules/typebox"
-    "node_modules/universalify"
-    "node_modules/url-parse"
-    "node_modules/ws"
     "node_modules/zca-js"
+    "node_modules/zca-js/node_modules/asynckit"
+    "node_modules/zca-js/node_modules/bignumber.js"
+    "node_modules/zca-js/node_modules/call-bind-apply-helpers"
+    "node_modules/zca-js/node_modules/combined-stream"
+    "node_modules/zca-js/node_modules/crypto-js"
+    "node_modules/zca-js/node_modules/delayed-stream"
+    "node_modules/zca-js/node_modules/dunder-proto"
+    "node_modules/zca-js/node_modules/es-define-property"
+    "node_modules/zca-js/node_modules/es-errors"
+    "node_modules/zca-js/node_modules/es-object-atoms"
+    "node_modules/zca-js/node_modules/es-set-tostringtag"
+    "node_modules/zca-js/node_modules/form-data"
+    "node_modules/zca-js/node_modules/function-bind"
+    "node_modules/zca-js/node_modules/get-intrinsic"
+    "node_modules/zca-js/node_modules/get-proto"
+    "node_modules/zca-js/node_modules/gopd"
+    "node_modules/zca-js/node_modules/has-symbols"
+    "node_modules/zca-js/node_modules/has-tostringtag"
+    "node_modules/zca-js/node_modules/hasown"
+    "node_modules/zca-js/node_modules/json-bigint"
+    "node_modules/zca-js/node_modules/math-intrinsics"
+    "node_modules/zca-js/node_modules/mime-db"
+    "node_modules/zca-js/node_modules/mime-types"
+    "node_modules/zca-js/node_modules/pako"
+    "node_modules/zca-js/node_modules/semver"
+    "node_modules/zca-js/node_modules/spark-md5"
+    "node_modules/zca-js/node_modules/tldts"
+    "node_modules/zca-js/node_modules/tldts-core"
+    "node_modules/zca-js/node_modules/tough-cookie"
+    "node_modules/zca-js/node_modules/ws"
     "node_modules/zod"
   ];
 }
